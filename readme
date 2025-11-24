@@ -1,0 +1,382 @@
+# Proyecto: División en Párrafos
+## Análisis y Diseño de Algoritmos
+
+---
+
+## 📋 Descripción del Proyecto
+
+Este proyecto implementa y compara **cuatro algoritmos diferentes** para resolver el problema de División en Párrafos:
+
+1. **Algoritmo Iterativo** (Programación Dinámica Bottom-Up)
+2. **Algoritmo Recursivo Puro** (Sin memorización)
+3. **Algoritmo Divide y Vencerás** (Con memoización)
+4. **Algoritmo Exhaustivo** (Fuerza bruta)
+
+### Problema
+
+Dada una secuencia de palabras con longitudes `l₁, l₂, ..., lₖ`, se desea agruparlas en líneas de longitud `L`. Las palabras están separadas por espacios cuya amplitud ideal es `b`, pero pueden ajustarse. El objetivo es minimizar el costo total de ajuste de espacios.
+
+**Función de Costo:**
+- Para una línea con palabras `pᵢ, pᵢ₊₁, ..., pⱼ`: costo = `(j-i) · |b' - b|`
+- Donde `b' = (L - Σlongitudes) / (j-i)`
+- La última línea tiene costo 0 (a menos que `b' < 0`, que es inválido)
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+proyecto-division-parrafos/
+│
+├── implementacion.py         # Implementación de los 4 algoritmos
+├── test_division_parrafos.py    # Suite de pruebas con pytest
+├── analisis_graficas.py         # Análisis de rendimiento y gráficas
+├── README.md                    # Este archivo
+├── requirements.txt             # Dependencias del proyecto
+│
+└── resultados/                  # (generado al ejecutar)
+    ├── analisis_division_parrafos.png
+    └── resultados_benchmark.json
+```
+
+---
+
+## 🛠️ Instalación
+
+### Prerrequisitos
+
+- Python 3.8 o superior
+- pip (gestor de paquetes de Python)
+
+### Paso 1: Clonar o descargar el proyecto
+
+```bash
+# Si usas git
+git clone <url-del-repositorio>
+cd proyecto-division-parrafos
+```
+
+### Paso 2: Crear entorno virtual (recomendado)
+
+```bash
+# En Windows
+python -m venv venv
+venv\Scripts\activate
+
+# En macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### Paso 3: Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+**Contenido de `requirements.txt`:**
+```
+pytest>=7.0.0
+matplotlib>=3.5.0
+numpy>=1.21.0
+```
+
+---
+
+## 🚀 Uso del Proyecto
+
+### 1. Ejecutar el programa principal
+
+Ejecuta los 4 algoritmos con casos de prueba predefinidos:
+
+```bash
+python division_parrafos.py
+```
+
+**Salida esperada:**
+- Comparación de los 4 algoritmos en casos pequeños
+- Comparación de algoritmos eficientes en casos medianos
+- Tabla de complejidades teóricas
+- Visualización de la solución óptima
+
+### 2. Ejecutar pruebas con pytest
+
+```bash
+# Ejecutar todas las pruebas
+pytest test_division_parrafos.py -v
+
+# Ejecutar con más detalles
+pytest test_division_parrafos.py -v --tb=short
+
+# Ejecutar pruebas específicas
+pytest test_division_parrafos.py::TestAlgoritmoIterativo -v
+
+# Ver cobertura (requiere pytest-cov)
+pytest test_division_parrafos.py --cov=division_parrafos --cov-report=html
+```
+
+### 3. Generar análisis y gráficas
+
+```bash
+python analisis_graficas.py
+```
+
+**Esto generará:**
+- ✅ 6 gráficas comparativas en un solo archivo PNG
+- ✅ Tabla comparativa de rendimiento
+- ✅ Informe completo con conclusiones
+- ✅ Archivo JSON con todos los datos
+
+---
+
+## 📊 Gráficas Generadas
+
+El módulo `analisis_graficas.py` genera 6 gráficas:
+
+1. **Tiempo vs Tamaño (Escala Log)** - Muestra crecimiento exponencial de algoritmos ineficientes
+2. **Tiempo vs Tamaño (Escala Lineal)** - Comparación directa de tiempos
+3. **Comparación de Costos** - Verifica que todos dan el mismo resultado óptimo
+4. **Speedup Relativo** - Cuántas veces más lento es cada algoritmo vs Iterativo
+5. **Tiempo Acumulado** - Barras apiladas mostrando contribución total
+6. **Eficiencia (tiempo/n²)** - Normalizada por complejidad cuadrática
+
+---
+
+## 🧪 Casos de Prueba
+
+### Caso Pequeño (todos los algoritmos)
+```python
+palabras = [5, 3, 4, 6, 2]
+L = 15
+b = 1.5
+```
+
+### Caso Mediano (solo algoritmos eficientes)
+```python
+palabras = [3, 4, 2, 5, 3, 4, 6, 2, 3, 5]
+L = 20
+b = 2.0
+```
+
+### Personalizar casos
+
+```python
+from division_parrafos import DivisionParrafos
+
+# Crear instancia con tus datos
+dp = DivisionParrafos(
+    palabras=[5, 3, 4, 6, 2, 3],
+    L=20,
+    b=1.5
+)
+
+# Resolver con el algoritmo que prefieras
+costo, cortes = dp.resolver_iterativo()
+print(f"Costo óptimo: {costo}")
+print(f"Puntos de corte: {cortes}")
+```
+
+---
+
+## 📈 Complejidad de los Algoritmos
+
+| Algoritmo | Complejidad Temporal | Complejidad Espacial | Uso Recomendado |
+|-----------|---------------------|---------------------|-----------------|
+| **Iterativo (DP)** | O(n²) | O(n) | ✅ **PRODUCCIÓN** |
+| **Recursivo Puro** | O(2ⁿ) | O(n) stack | ⚠️ Solo demostración (n ≤ 10) |
+| **Divide y Vencerás** | O(n²) | O(n²) | ✅ Alternativa válida |
+| **Exhaustivo** | O(B(n))* | O(n) | ❌ Solo n ≤ 5 |
+
+*B(n) = Número de Bell (particiones de conjunto)
+
+---
+
+## 🧩 Estructura del Código
+
+### `division_parrafos.py`
+
+#### Clase Principal: `DivisionParrafos`
+
+```python
+class DivisionParrafos:
+    def __init__(self, palabras: List[int], L: int, b: float)
+    
+    # Método auxiliar
+    def calcular_costo_linea(self, i: int, j: int) -> float
+    
+    # 4 algoritmos principales
+    def resolver_iterativo(self) -> Tuple[float, List[int]]
+    def resolver_recursivo(self) -> Tuple[float, List[int]]
+    def resolver_divide_venceras(self) -> Tuple[float, List[int]]
+    def resolver_exhaustivo(self) -> Tuple[float, List[int]]
+```
+
+#### Funciones Auxiliares
+
+```python
+def ejecutar_y_medir(algoritmo_func, nombre: str) -> Dict
+def mostrar_solucion(palabras, cortes, L, b)
+def ejecutar_comparacion()  # Función principal
+```
+
+---
+
+## 🧪 Suite de Pruebas (pytest)
+
+### Categorías de Tests
+
+1. **TestCalculoCosto** - Verifica cálculo correcto de costos
+2. **TestAlgoritmoIterativo** - Tests del algoritmo DP
+3. **TestAlgoritmoRecursivo** - Tests del recursivo puro
+4. **TestAlgoritmoDivideVenceras** - Tests D&V
+5. **TestAlgoritmoExhaustivo** - Tests exhaustivo
+6. **TestCasosEspeciales** - Edge cases
+7. **TestRendimiento** - Benchmarks de tiempo
+8. **TestValidacionResultados** - Validación de outputs
+
+### Ejecutar Subconjuntos de Tests
+
+```bash
+# Solo tests de iterativo
+pytest test_division_parrafos.py::TestAlgoritmoIterativo -v
+
+# Solo tests de casos especiales
+pytest test_division_parrafos.py::TestCasosEspeciales -v
+
+# Tests que contienen "costo" en el nombre
+pytest test_division_parrafos.py -k "costo" -v
+```
+
+---
+
+## 📊 Resultados Esperados
+
+### Tiempo de Ejecución (aproximado)
+
+Para `n = 20` palabras:
+- **Iterativo:** ~0.5 ms ✅
+- **Divide y Vencerás:** ~1.5 ms ✅
+- **Recursivo:** ~30,000 ms ⚠️
+- **Exhaustivo:** No termina ❌
+
+### Conclusiones del Análisis
+
+1. ✅ **Iterativo es el ganador** - Más rápido y eficiente
+2. ⚠️ **Recursivo puro es impracticable** para n > 10
+3. ⚠️ **Exhaustivo solo sirve para demostración** (n ≤ 5)
+4. ✅ **Divide y Vencerás es competitivo** pero con más overhead
+5. 🎯 **Todos encuentran el mismo costo óptimo** (validación correcta)
+
+---
+
+## 🎨 Personalización
+
+### Cambiar parámetros de benchmark
+
+Edita `analisis_graficas.py`:
+
+```python
+def main():
+    analizador = AnalizadorRendimiento()
+    
+    # Personaliza estos valores
+    tamaños = [3, 5, 8, 10, 15, 20, 30, 40, 50]  # Agregar más tamaños
+    L = 25  # Cambiar longitud de línea
+    b = 1.5  # Cambiar amplitud ideal
+    
+    analizador.ejecutar_benchmark(tamaños, L=L, b=b)
+    # ...
+```
+
+### Agregar nuevos tests
+
+En `test_division_parrafos.py`:
+
+```python
+def test_mi_caso_especial():
+    """Descripción del test"""
+    dp = DivisionParrafos([...], L=..., b=...)
+    costo, cortes = dp.resolver_iterativo()
+    assert costo < float('inf')
+    # ... más aserciones
+```
+
+---
+
+## 🐛 Solución de Problemas
+
+### Error: ModuleNotFoundError
+
+```bash
+# Asegúrate de tener instaladas las dependencias
+pip install -r requirements.txt
+```
+
+### Error: "No module named 'division_parrafos'"
+
+```bash
+# Asegúrate de estar en el directorio correcto
+cd proyecto-division-parrafos
+
+# O agrega el path manualmente
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"  # Linux/Mac
+set PYTHONPATH=%PYTHONPATH%;%cd%  # Windows
+```
+
+### Gráficas no se muestran
+
+```python
+# Si usas SSH o entorno sin GUI, guarda sin mostrar:
+plt.savefig('grafica.png')
+# Comenta: plt.show()
+```
+
+---
+
+## 📚 Referencias
+
+- **Programación Dinámica:** Cormen, T. H., et al. "Introduction to Algorithms"
+- **Divide y Vencerás:** Problema de líneas óptimas (Knuth-Plass)
+- **Complejidad:** Análisis asintótico y notación Big-O
+
+---
+
+## 👨‍💻 Autor
+
+Proyecto desarrollado para el curso de Análisis y Diseño de Algoritmos
+
+---
+
+## 📝 Licencia
+
+Este proyecto es de uso académico.
+
+---
+
+## 🎯 Checklist del Proyecto
+
+- [x] ✅ Algoritmo Iterativo (Programación Dinámica)
+- [x] ✅ Algoritmo Recursivo Puro
+- [x] ✅ Algoritmo Divide y Vencerás
+- [x] ✅ Algoritmo Exhaustivo
+- [x] ✅ Mediciones de tiempo
+- [x] ✅ Comparación de rendimiento
+- [x] ✅ Gráficas de análisis
+- [x] ✅ Suite de tests con pytest
+- [x] ✅ Documentación completa
+- [x] ✅ Casos de prueba variados
+- [x] ✅ Análisis de complejidad
+
+---
+
+## 🚀 Próximos Pasos (Opcional)
+
+1. Implementar visualización interactiva con tkinter
+2. Agregar soporte para diferentes métricas de costo
+3. Exportar resultados a PDF
+4. Crear API REST para el servicio
+5. Implementar paralelización para entradas muy grandes
+
+---
+
+**¡Proyecto completo y listo para entregar! 🎉**

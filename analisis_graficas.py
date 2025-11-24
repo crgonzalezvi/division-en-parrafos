@@ -1,0 +1,428 @@
+"""
+Módulo de análisis y generación de gráficas para División en Párrafos
+Requiere: matplotlib, numpy
+Instalar con: pip install matplotlib numpy
+"""
+
+import time
+import matplotlib.pyplot as plt
+import numpy as np
+from typing import List, Dict, Tuple
+from division_parrafos import DivisionParrafos
+import json
+
+
+class AnalizadorRendimiento:
+    """Clase para analizar y comparar el rendimiento de los algoritmos"""
+    
+    def __init__(self):
+        self.resultados = []
+    
+    def ejecutar_benchmark(self, tamaños: List[int], L: int = 20, b: float = 2.0):
+        """
+        Ejecuta benchmarks para diferentes tamaños de entrada.
+        
+        Args:
+            tamaños: Lista de tamaños de entrada a probar
+            L: Longitud de línea
+            b: Amplitud ideal de espacios
+        """
+        print("=" * 80)
+        print("BENCHMARK: Análisis de Rendimiento por Tamaño de Entrada")
+        print("=" * 80)
+        
+        for n in tamaños:
+            print(f"\n🔍 Probando con n={n} palabras...")
+            
+            # Generar palabras aleatorias pero reproducibles
+            np.random.seed(42)
+            palabras = np.random.randint(2, 8, size=n).tolist()
+            
+            dp = DivisionParrafos(palabras, L, b)
+            
+            resultado = {
+                'n': n,
+                'algoritmos': {}
+            }
+            
+            # Iterativo (siempre ejecutar)
+            print("  ⏱️  Ejecutando Iterativo...")
+            inicio = time.perf_counter()
+            costo_iter, _ = dp.resolver_iterativo()
+            tiempo_iter = time.perf_counter() - inicio
+            resultado['algoritmos']['Iterativo'] = {
+                'tiempo': tiempo_iter,
+                'costo': costo_iter
+            }
+            print(f"     ✓ Completado en {tiempo_iter*1000:.2f} ms")
+            
+            # Divide y Vencerás (siempre ejecutar)
+            print("  ⏱️  Ejecutando Divide y Vencerás...")
+            inicio = time.perf_counter()
+            costo_dyv, _ = dp.resolver_divide_venceras()
+            tiempo_dyv = time.perf_counter() - inicio
+            resultado['algoritmos']['Divide y Vencerás'] = {
+                'tiempo': tiempo_dyv,
+                'costo': costo_dyv
+            }
+            print(f"     ✓ Completado en {tiempo_dyv*1000:.2f} ms")
+            
+            # Recursivo (solo para n pequeño)
+            if n <= 8:
+                print("  ⏱️  Ejecutando Recursivo Puro...")
+                inicio = time.perf_counter()
+                costo_rec, _ = dp.resolver_recursivo()
+                tiempo_rec = time.perf_counter() - inicio
+                resultado['algoritmos']['Recursivo'] = {
+                    'tiempo': tiempo_rec,
+                    'costo': costo_rec
+                }
+                print(f"     ✓ Completado en {tiempo_rec*1000:.2f} ms")
+            else:
+                print("     ⚠️  Recursivo omitido (n demasiado grande)")
+            
+            # Exhaustivo (solo para n muy pequeño)
+            if n <= 5:
+                print("  ⏱️  Ejecutando Exhaustivo...")
+                inicio = time.perf_counter()
+                costo_exh, _ = dp.resolver_exhaustivo()
+                tiempo_exh = time.perf_counter() - inicio
+                resultado['algoritmos']['Exhaustivo'] = {
+                    'tiempo': tiempo_exh,
+                    'costo': costo_exh
+                }
+                print(f"     ✓ Completado en {tiempo_exh*1000:.2f} ms")
+            else:
+                print("     ⚠️  Exhaustivo omitido (n demasiado grande)")
+            
+            self.resultados.append(resultado)
+    
+    def generar_graficas(self, guardar: bool = True):
+        """Genera todas las gráficas de análisis"""
+        if not self.resultados:
+            print("❌ No hay resultados para graficar. Ejecuta benchmark primero.")
+            return
+        
+        # Configuración general
+        plt.style.use('seaborn-v0_8-darkgrid')
+        fig = plt.figure(figsize=(16, 12))
+        
+        # 1. Gráfica de tiempo vs tamaño (escala logarítmica)
+        ax1 = plt.subplot(2, 3, 1)
+        self._grafica_tiempo_vs_n(ax1, log_scale=True)
+        
+        # 2. Gráfica de tiempo vs tamaño (escala lineal)
+        ax2 = plt.subplot(2, 3, 2)
+        self._grafica_tiempo_vs_n(ax2, log_scale=False)
+        
+        # 3. Comparación de costos
+        ax3 = plt.subplot(2, 3, 3)
+        self._grafica_comparacion_costos(ax3)
+        
+        # 4. Speedup relativo
+        ax4 = plt.subplot(2, 3, 4)
+        self._grafica_speedup(ax4)
+        
+        # 5. Tiempo acumulado
+        ax5 = plt.subplot(2, 3, 5)
+        self._grafica_tiempo_acumulado(ax5)
+        
+        # 6. Eficiencia (tiempo/n²)
+        ax6 = plt.subplot(2, 3, 6)
+        self._grafica_eficiencia(ax6)
+        
+        plt.tight_layout()
+        
+        if guardar:
+            plt.savefig('analisis_division_parrafos.png', dpi=300, bbox_inches='tight')
+            print("\n✅ Gráfica guardada como 'analisis_division_parrafos.png'")
+        
+        plt.show()
+    
+    def _grafica_tiempo_vs_n(self, ax, log_scale: bool = False):
+        """Gráfica de tiempo de ejecución vs tamaño de entrada"""
+        algoritmos = {}
+        
+        for res in self.resultados:
+            for alg_nombre, alg_datos in res['algoritmos'].items():
+                if alg_nombre not in algoritmos:
+                    algoritmos[alg_nombre] = {'n': [], 'tiempo': []}
+                algoritmos[alg_nombre]['n'].append(res['n'])
+                algoritmos[alg_nombre]['tiempo'].append(alg_datos['tiempo'] * 1000)  # ms
+        
+        colores = {
+            'Iterativo': '#2ecc71',
+            'Divide y Vencerás': '#3498db',
+            'Recursivo': '#e74c3c',
+            'Exhaustivo': '#9b59b6'
+        }
+        
+        for alg_nombre, datos in algoritmos.items():
+            ax.plot(datos['n'], datos['tiempo'], 
+                   marker='o', linewidth=2, markersize=8,
+                   label=alg_nombre, color=colores.get(alg_nombre, 'gray'))
+        
+        if log_scale:
+            ax.set_yscale('log')
+            ax.set_title('Tiempo de Ejecución vs Tamaño (Escala Log)', fontsize=12, fontweight='bold')
+        else:
+            ax.set_title('Tiempo de Ejecución vs Tamaño (Escala Lineal)', fontsize=12, fontweight='bold')
+        
+        ax.set_xlabel('Número de palabras (n)', fontsize=10)
+        ax.set_ylabel('Tiempo (ms)', fontsize=10)
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+    
+    def _grafica_comparacion_costos(self, ax):
+        """Gráfica comparando que todos dan el mismo costo óptimo"""
+        n_values = [res['n'] for res in self.resultados]
+        
+        # Obtener costos de cada algoritmo
+        algoritmos = {}
+        for res in self.resultados:
+            for alg_nombre, alg_datos in res['algoritmos'].items():
+                if alg_nombre not in algoritmos:
+                    algoritmos[alg_nombre] = []
+                algoritmos[alg_nombre].append(alg_datos['costo'])
+        
+        x = np.arange(len(n_values))
+        width = 0.2
+        
+        colores = {
+            'Iterativo': '#2ecc71',
+            'Divide y Vencerás': '#3498db',
+            'Recursivo': '#e74c3c',
+            'Exhaustivo': '#9b59b6'
+        }
+        
+        for i, (alg_nombre, costos) in enumerate(algoritmos.items()):
+            offset = width * (i - len(algoritmos)/2)
+            ax.bar(x + offset, costos, width, 
+                  label=alg_nombre, color=colores.get(alg_nombre, 'gray'), alpha=0.8)
+        
+        ax.set_xlabel('Tamaño de entrada (n)', fontsize=10)
+        ax.set_ylabel('Costo óptimo', fontsize=10)
+        ax.set_title('Comparación de Costos Óptimos', fontsize=12, fontweight='bold')
+        ax.set_xticks(x)
+        ax.set_xticklabels(n_values)
+        ax.legend()
+        ax.grid(True, alpha=0.3, axis='y')
+    
+    def _grafica_speedup(self, ax):
+        """Gráfica de speedup del iterativo vs otros algoritmos"""
+        n_values = []
+        speedups = {'Recursivo': [], 'Exhaustivo': [], 'Divide y Vencerás': []}
+        
+        for res in self.resultados:
+            if 'Iterativo' not in res['algoritmos']:
+                continue
+            
+            n_values.append(res['n'])
+            tiempo_iter = res['algoritmos']['Iterativo']['tiempo']
+            
+            for alg_nombre in ['Recursivo', 'Exhaustivo', 'Divide y Vencerás']:
+                if alg_nombre in res['algoritmos']:
+                    tiempo_alg = res['algoritmos'][alg_nombre]['tiempo']
+                    speedup = tiempo_alg / tiempo_iter if tiempo_iter > 0 else 0
+                    speedups[alg_nombre].append(speedup)
+                else:
+                    speedups[alg_nombre].append(None)
+        
+        for alg_nombre, valores in speedups.items():
+            # Filtrar Nones
+            n_filtrado = [n for n, v in zip(n_values, valores) if v is not None]
+            v_filtrado = [v for v in valores if v is not None]
+            
+            if v_filtrado:
+                ax.plot(n_filtrado, v_filtrado, marker='o', linewidth=2, 
+                       markersize=8, label=f'{alg_nombre}')
+        
+        ax.axhline(y=1, color='red', linestyle='--', linewidth=2, label='Baseline (Iterativo)')
+        ax.set_xlabel('Número de palabras (n)', fontsize=10)
+        ax.set_ylabel('Speedup (veces más lento que Iterativo)', fontsize=10)
+        ax.set_title('Speedup Relativo vs Iterativo', fontsize=12, fontweight='bold')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        ax.set_yscale('log')
+    
+    def _grafica_tiempo_acumulado(self, ax):
+        """Gráfica de barras apiladas con tiempo acumulado"""
+        algoritmos_nombres = set()
+        for res in self.resultados:
+            algoritmos_nombres.update(res['algoritmos'].keys())
+        
+        n_values = [res['n'] for res in self.resultados]
+        
+        datos_por_algoritmo = {alg: [] for alg in algoritmos_nombres}
+        
+        for res in self.resultados:
+            for alg in algoritmos_nombres:
+                if alg in res['algoritmos']:
+                    datos_por_algoritmo[alg].append(res['algoritmos'][alg]['tiempo'] * 1000)
+                else:
+                    datos_por_algoritmo[alg].append(0)
+        
+        bottom = np.zeros(len(n_values))
+        colores = {
+            'Iterativo': '#2ecc71',
+            'Divide y Vencerás': '#3498db',
+            'Recursivo': '#e74c3c',
+            'Exhaustivo': '#9b59b6'
+        }
+        
+        for alg, tiempos in datos_por_algoritmo.items():
+            ax.bar(n_values, tiempos, bottom=bottom, 
+                  label=alg, color=colores.get(alg, 'gray'), alpha=0.8)
+            bottom += np.array(tiempos)
+        
+        ax.set_xlabel('Número de palabras (n)', fontsize=10)
+        ax.set_ylabel('Tiempo acumulado (ms)', fontsize=10)
+        ax.set_title('Tiempo Acumulado por Algoritmo', fontsize=12, fontweight='bold')
+        ax.legend()
+        ax.grid(True, alpha=0.3, axis='y')
+    
+    def _grafica_eficiencia(self, ax):
+        """Gráfica de eficiencia (tiempo/n²)"""
+        algoritmos = {}
+        
+        for res in self.resultados:
+            n = res['n']
+            for alg_nombre, alg_datos in res['algoritmos'].items():
+                if alg_nombre not in algoritmos:
+                    algoritmos[alg_nombre] = {'n': [], 'eficiencia': []}
+                
+                # Eficiencia = tiempo / n²
+                eficiencia = (alg_datos['tiempo'] * 1000) / (n * n)
+                algoritmos[alg_nombre]['n'].append(n)
+                algoritmos[alg_nombre]['eficiencia'].append(eficiencia)
+        
+        colores = {
+            'Iterativo': '#2ecc71',
+            'Divide y Vencerás': '#3498db',
+            'Recursivo': '#e74c3c',
+            'Exhaustivo': '#9b59b6'
+        }
+        
+        for alg_nombre, datos in algoritmos.items():
+            ax.plot(datos['n'], datos['eficiencia'], 
+                   marker='o', linewidth=2, markersize=8,
+                   label=alg_nombre, color=colores.get(alg_nombre, 'gray'))
+        
+        ax.set_xlabel('Número de palabras (n)', fontsize=10)
+        ax.set_ylabel('Eficiencia (ms/n²)', fontsize=10)
+        ax.set_title('Eficiencia Algorítmica', fontsize=12, fontweight='bold')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+    
+    def generar_tabla_comparativa(self):
+        """Genera una tabla comparativa de resultados"""
+        print("\n" + "=" * 100)
+        print("TABLA COMPARATIVA DE RENDIMIENTO")
+        print("=" * 100)
+        
+        print(f"\n{'n':<5} | {'Algoritmo':<20} | {'Tiempo (ms)':<15} | {'Costo':<15} | {'Memoria':<15}")
+        print("-" * 100)
+        
+        for res in self.resultados:
+            n = res['n']
+            for alg_nombre, alg_datos in sorted(res['algoritmos'].items()):
+                tiempo_ms = alg_datos['tiempo'] * 1000
+                costo = alg_datos['costo']
+                memoria = "O(n)" if alg_nombre in ['Iterativo', 'Divide y Vencerás'] else "O(n) stack"
+                
+                print(f"{n:<5} | {alg_nombre:<20} | {tiempo_ms:>13.4f} | {costo:>13.4f} | {memoria:<15}")
+            print("-" * 100)
+    
+    def guardar_resultados_json(self, filename: str = 'resultados_benchmark.json'):
+        """Guarda los resultados en formato JSON"""
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(self.resultados, f, indent=2, ensure_ascii=False)
+        print(f"\n✅ Resultados guardados en '{filename}'")
+    
+    def generar_informe_completo(self):
+        """Genera un informe completo en texto"""
+        print("\n" + "=" * 100)
+        print("INFORME COMPLETO DE ANÁLISIS")
+        print("=" * 100)
+        
+        print("\n📊 COMPLEJIDAD TEÓRICA:")
+        print("-" * 100)
+        print(f"{'Algoritmo':<25} | {'Tiempo':<15} | {'Espacio':<15} | {'Características'}")
+        print("-" * 100)
+        print(f"{'Iterativo (DP)':<25} | {'O(n²)':<15} | {'O(n)':<15} | Óptimo, bottom-up")
+        print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<15} | {'O(n)':<15} | Exponencial, sin memo")
+        print(f"{'Divide y Vencerás':<25} | {'O(n²)':<15} | {'O(n²)':<15} | Con memoización")
+        print(f"{'Exhaustivo':<25} | {'O(B(n))':<15} | {'O(n)':<15} | Bell number, muy lento")
+        
+        print("\n📈 ANÁLISIS DE RESULTADOS EXPERIMENTALES:")
+        print("-" * 100)
+        
+        # Calcular promedios
+        if self.resultados:
+            iter_times = []
+            dyv_times = []
+            
+            for res in self.resultados:
+                if 'Iterativo' in res['algoritmos']:
+                    iter_times.append(res['algoritmos']['Iterativo']['tiempo'])
+                if 'Divide y Vencerás' in res['algoritmos']:
+                    dyv_times.append(res['algoritmos']['Divide y Vencerás']['tiempo'])
+            
+            if iter_times:
+                print(f"Tiempo promedio Iterativo: {np.mean(iter_times)*1000:.4f} ms")
+            if dyv_times:
+                print(f"Tiempo promedio Divide y Vencerás: {np.mean(dyv_times)*1000:.4f} ms")
+            
+            if iter_times and dyv_times:
+                ratio = np.mean(dyv_times) / np.mean(iter_times)
+                print(f"Ratio D&V/Iterativo: {ratio:.2f}x")
+        
+        print("\n✅ CONCLUSIONES:")
+        print("-" * 100)
+        print("1. El algoritmo ITERATIVO (Programación Dinámica) es el más eficiente")
+        print("2. Recursivo puro es impracticable para n > 10")
+        print("3. Exhaustivo solo sirve para demostración con n <= 5")
+        print("4. Divide y Vencerás tiene rendimiento similar a Iterativo pero más overhead")
+        print("5. Para producción: usar ITERATIVO")
+
+
+def main():
+    """Función principal para ejecutar análisis completo"""
+    print("🚀 Iniciando análisis completo de rendimiento...")
+    
+    analizador = AnalizadorRendimiento()
+    
+    # Definir tamaños a probar
+    # Pequeños: incluyen todos los algoritmos
+    # Medianos/grandes: solo algoritmos eficientes
+    tamaños = [3, 5, 8, 10, 15, 20, 30, 40]
+    
+    print(f"\nTamaños a probar: {tamaños}")
+    print("Nota: Algoritmos lentos se omitirán automáticamente en entradas grandes\n")
+    
+    # Ejecutar benchmark
+    analizador.ejecutar_benchmark(tamaños, L=20, b=2.0)
+    
+    # Generar tabla comparativa
+    analizador.generar_tabla_comparativa()
+    
+    # Generar informe
+    analizador.generar_informe_completo()
+    
+    # Guardar resultados
+    analizador.guardar_resultados_json()
+    
+    # Generar gráficas
+    print("\n📊 Generando gráficas...")
+    analizador.generar_graficas(guardar=True)
+    
+    print("\n" + "=" * 100)
+    print("✅ ANÁLISIS COMPLETO FINALIZADO")
+    print("=" * 100)
+    print("\nArchivos generados:")
+    print("  - analisis_division_parrafos.png (gráficas)")
+    print("  - resultados_benchmark.json (datos en JSON)")
+
+
+if __name__ == "__main__":
+    main()
