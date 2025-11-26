@@ -1,0 +1,126 @@
+[
+  {
+    "n": 3,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 4.350004019215703e-05,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.0022314999951049685,
+        "costo": 0.0
+      },
+      "Recursivo": {
+        "tiempo": 0.0007058000192046165,
+        "costo": 0.0
+      },
+      "Exhaustivo": {
+        "tiempo": 0.00032869999995455146,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 5,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 8.520000847056508e-05,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.0001126999850384891,
+        "costo": 0.0
+      },
+      "Recursivo": {
+        "tiempo": 0.0003313000197522342,
+        "costo": 0.0
+      },
+      "Exhaustivo": {
+        "tiempo": 0.00027030002092942595,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 8,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 6.629998097196221e-05,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.00015110004460439086,
+        "costo": 0.0
+      },
+      "Recursivo": {
+        "tiempo": 0.0004860000335611403,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 10,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 0.00011470000026747584,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.00018470000941306353,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 15,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 0.00041259999852627516,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.0004366000066511333,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 20,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 0.0005136000108905137,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.005529899965040386,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 30,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 0.0006701999809592962,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.000818900007288903,
+        "costo": 0.0
+      }
+    }
+  },
+  {
+    "n": 40,
+    "algoritmos": {
+      "Iterativo": {
+        "tiempo": 0.0010538999922573566,
+        "costo": 0.0
+      },
+      "Divide y Vencerás": {
+        "tiempo": 0.0012670999858528376,
+        "costo": 0.0
+      }
+    }
+  }
+]

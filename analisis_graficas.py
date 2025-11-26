@@ -7,7 +7,7 @@ Instalar con: pip install matplotlib numpy
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import List, Dict, Tuple
+from typing import List
 from division_parrafos import DivisionParrafos
 import json
 
@@ -105,7 +105,7 @@ class AnalizadorRendimiento:
         
         # Configuración general
         plt.style.use('seaborn-v0_8-darkgrid')
-        fig = plt.figure(figsize=(16, 12))
+        plt.figure(figsize=(16, 12))
         
         # 1. Gráfica de tiempo vs tamaño (escala logarítmica)
         ax1 = plt.subplot(2, 3, 1)
@@ -158,9 +158,11 @@ class AnalizadorRendimiento:
         }
         
         for alg_nombre, datos in algoritmos.items():
-            ax.plot(datos['n'], datos['tiempo'], 
-                   marker='o', linewidth=2, markersize=8,
-                   label=alg_nombre, color=colores.get(alg_nombre, 'gray'))
+            ax.plot(
+                datos['n'], datos['tiempo'],
+                marker='o', linewidth=2, markersize=8,
+                label=alg_nombre, color=colores.get(alg_nombre, 'gray')
+            )
         
         if log_scale:
             ax.set_yscale('log')
@@ -174,40 +176,54 @@ class AnalizadorRendimiento:
         ax.grid(True, alpha=0.3)
     
     def _grafica_comparacion_costos(self, ax):
-        """Gráfica comparando que todos dan el mismo costo óptimo"""
-        n_values = [res['n'] for res in self.resultados]
-        
-        # Obtener costos de cada algoritmo
-        algoritmos = {}
+        """Gráfica comparando que todos dan (idealmente) el mismo costo óptimo"""
+        n_values = []
+        costos = []
+
         for res in self.resultados:
-            for alg_nombre, alg_datos in res['algoritmos'].items():
-                if alg_nombre not in algoritmos:
-                    algoritmos[alg_nombre] = []
-                algoritmos[alg_nombre].append(alg_datos['costo'])
-        
-        x = np.arange(len(n_values))
-        width = 0.2
-        
-        colores = {
-            'Iterativo': '#2ecc71',
-            'Divide y Vencerás': '#3498db',
-            'Recursivo': '#e74c3c',
-            'Exhaustivo': '#9b59b6'
-        }
-        
-        for i, (alg_nombre, costos) in enumerate(algoritmos.items()):
-            offset = width * (i - len(algoritmos)/2)
-            ax.bar(x + offset, costos, width, 
-                  label=alg_nombre, color=colores.get(alg_nombre, 'gray'), alpha=0.8)
-        
-        ax.set_xlabel('Tamaño de entrada (n)', fontsize=10)
+            algs = res.get('algoritmos', {})
+            if not algs:
+                continue
+
+            # Tomamos el primer algoritmo para obtener el costo
+            alg_datos = next(iter(algs.values()), None)
+            if alg_datos is None:
+                continue
+
+            costo = alg_datos.get('costo', None)
+            if costo is None:
+                continue
+
+            n_values.append(res['n'])
+            costos.append(float(costo))
+
+        # Si no hay datos, mostramos un mensaje en la gráfica
+        if not n_values or not costos:
+            ax.text(
+                0.5, 0.5, "Sin datos de costo",
+                ha='center', va='center', transform=ax.transAxes
+            )
+            ax.set_title('Costo Óptimo por Tamaño de Entrada', fontsize=12, fontweight='bold')
+            return
+
+        # Asegurar que ambas listas tengan la misma longitud
+        min_len = min(len(n_values), len(costos))
+        n_values = n_values[:min_len]
+        costos = costos[:min_len]
+
+        x = np.arange(min_len)
+        costos = np.array(costos)
+
+        ax.bar(x, costos, color='#2ecc71', alpha=0.8, label='Costo Óptimo')
+    
+        ax.set_xlabel('Número de palabras (n)', fontsize=10)
         ax.set_ylabel('Costo óptimo', fontsize=10)
-        ax.set_title('Comparación de Costos Óptimos', fontsize=12, fontweight='bold')
+        ax.set_title('Costo Óptimo por Tamaño de Entrada', fontsize=12, fontweight='bold')
         ax.set_xticks(x)
         ax.set_xticklabels(n_values)
         ax.legend()
         ax.grid(True, alpha=0.3, axis='y')
-    
+
     def _grafica_speedup(self, ax):
         """Gráfica de speedup del iterativo vs otros algoritmos"""
         n_values = []
@@ -234,10 +250,17 @@ class AnalizadorRendimiento:
             v_filtrado = [v for v in valores if v is not None]
             
             if v_filtrado:
-                ax.plot(n_filtrado, v_filtrado, marker='o', linewidth=2, 
-                       markersize=8, label=f'{alg_nombre}')
+                ax.plot(
+                    n_filtrado, v_filtrado,
+                    marker='o', linewidth=2, markersize=8,
+                    label=f'{alg_nombre}'
+                )
         
-        ax.axhline(y=1, color='red', linestyle='--', linewidth=2, label='Baseline (Iterativo)')
+        ax.axhline(
+            y=1, color='red',
+            linestyle='--', linewidth=2,
+            label='Baseline (Iterativo)'
+        )
         ax.set_xlabel('Número de palabras (n)', fontsize=10)
         ax.set_ylabel('Speedup (veces más lento que Iterativo)', fontsize=10)
         ax.set_title('Speedup Relativo vs Iterativo', fontsize=12, fontweight='bold')
@@ -246,38 +269,41 @@ class AnalizadorRendimiento:
         ax.set_yscale('log')
     
     def _grafica_tiempo_acumulado(self, ax):
-        """Gráfica de barras apiladas con tiempo acumulado"""
-        algoritmos_nombres = set()
+        """Gráfica de comparación de tiempos de los algoritmos principales"""
+        n_values = []
+        iter_tiempos = []
+        dyv_tiempos = []
+    
         for res in self.resultados:
-            algoritmos_nombres.update(res['algoritmos'].keys())
+            n_values.append(res['n'])
         
-        n_values = [res['n'] for res in self.resultados]
+            if 'Iterativo' in res['algoritmos']:
+                iter_tiempos.append(res['algoritmos']['Iterativo']['tiempo'] * 1000)
+            else:
+                iter_tiempos.append(0)
         
-        datos_por_algoritmo = {alg: [] for alg in algoritmos_nombres}
-        
-        for res in self.resultados:
-            for alg in algoritmos_nombres:
-                if alg in res['algoritmos']:
-                    datos_por_algoritmo[alg].append(res['algoritmos'][alg]['tiempo'] * 1000)
-                else:
-                    datos_por_algoritmo[alg].append(0)
-        
-        bottom = np.zeros(len(n_values))
-        colores = {
-            'Iterativo': '#2ecc71',
-            'Divide y Vencerás': '#3498db',
-            'Recursivo': '#e74c3c',
-            'Exhaustivo': '#9b59b6'
-        }
-        
-        for alg, tiempos in datos_por_algoritmo.items():
-            ax.bar(n_values, tiempos, bottom=bottom, 
-                  label=alg, color=colores.get(alg, 'gray'), alpha=0.8)
-            bottom += np.array(tiempos)
-        
+            if 'Divide y Vencerás' in res['algoritmos']:
+                dyv_tiempos.append(res['algoritmos']['Divide y Vencerás']['tiempo'] * 1000)
+            else:
+                dyv_tiempos.append(0)
+    
+        width = 0.35
+        x = np.arange(len(n_values))
+    
+        ax.bar(
+            x - width/2, iter_tiempos, width,
+            label='Iterativo', color='#2ecc71', alpha=0.8
+        )
+        ax.bar(
+            x + width/2, dyv_tiempos, width,
+            label='Divide y Vencerás', color='#3498db', alpha=0.8
+        )
+    
         ax.set_xlabel('Número de palabras (n)', fontsize=10)
-        ax.set_ylabel('Tiempo acumulado (ms)', fontsize=10)
-        ax.set_title('Tiempo Acumulado por Algoritmo', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Tiempo (ms)', fontsize=10)
+        ax.set_title('Comparación de Tiempos - Algoritmos Eficientes', fontsize=12, fontweight='bold')
+        ax.set_xticks(x)
+        ax.set_xticklabels(n_values)
         ax.legend()
         ax.grid(True, alpha=0.3, axis='y')
     
@@ -304,9 +330,11 @@ class AnalizadorRendimiento:
         }
         
         for alg_nombre, datos in algoritmos.items():
-            ax.plot(datos['n'], datos['eficiencia'], 
-                   marker='o', linewidth=2, markersize=8,
-                   label=alg_nombre, color=colores.get(alg_nombre, 'gray'))
+            ax.plot(
+                datos['n'], datos['eficiencia'],
+                marker='o', linewidth=2, markersize=8,
+                label=alg_nombre, color=colores.get(alg_nombre, 'gray')
+            )
         
         ax.set_xlabel('Número de palabras (n)', fontsize=10)
         ax.set_ylabel('Eficiencia (ms/n²)', fontsize=10)

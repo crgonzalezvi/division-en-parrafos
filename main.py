@@ -61,18 +61,20 @@ class MenuPrincipal:
         """Ejecuta los tests con pytest"""
         print("\n🧪 Ejecutando tests con pytest...")
         print("-" * 80)
-        
+    
+        # Usar el mismo intérprete de Python que ejecuta main.py
         resultado = subprocess.run(
-            ['pytest', 'test_division_parrafos.py', '-v', '--tb=short'],
+            [sys.executable, '-m', 'pytest', 'test_division_parrafos.py', '-v', '--tb=short'],
             capture_output=False
         )
-        
+    
         if resultado.returncode == 0:
             print("\n✅ Todos los tests pasaron correctamente")
         else:
             print("\n❌ Algunos tests fallaron")
-        
+    
         self.pausar()
+
     
     def ejecutar_tests_cobertura(self):
         """Ejecuta tests con reporte de cobertura"""
