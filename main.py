@@ -61,42 +61,56 @@ class MenuPrincipal:
         """Ejecuta los tests con pytest"""
         print("\n🧪 Ejecutando tests con pytest...")
         print("-" * 80)
-    
-        # Usar el mismo intérprete de Python que ejecuta main.py
+        
         resultado = subprocess.run(
-            [sys.executable, '-m', 'pytest', 'test_division_parrafos.py', '-v', '--tb=short'],
+            [
+                sys.executable,
+                "-m", "pytest",
+                "test_division_parrafos.py",
+                "-v",
+                "--tb=short",
+            ],
             capture_output=False
         )
-    
+        
         if resultado.returncode == 0:
             print("\n✅ Todos los tests pasaron correctamente")
         else:
             print("\n❌ Algunos tests fallaron")
-    
+        
         self.pausar()
-
     
     def ejecutar_tests_cobertura(self):
         """Ejecuta tests con reporte de cobertura"""
         print("\n🧪 Ejecutando tests con cobertura...")
         print("-" * 80)
-        
-        # Verificar si pytest-cov está instalado
+
         try:
-            import pytest_cov
-            resultado = subprocess.run(
-                ['pytest', 'test_division_parrafos.py', '-v', 
-                 '--cov=division_parrafos', '--cov-report=term-missing'],
-                capture_output=False
-            )
-            
-            if resultado.returncode == 0:
-                print("\n✅ Tests completados. Ver reporte de cobertura arriba.")
-            
+            import pytest
+            import pytest_cov  # verificar que el plugin exista
         except ImportError:
             print("\n⚠️  pytest-cov no está instalado.")
-            print("Instala con: pip install pytest-cov")
-        
+            print("Instala con: pip install pytest pytest-cov")
+            self.pausar()
+            return
+
+        args = [
+            "test_division_parrafos.py",
+            "-v",
+            "--cov=division_parrafos",
+            "--cov-report=term-missing",
+        ]
+
+        try:
+            exit_code = pytest.main(args)
+        except SystemExit as e:
+            exit_code = e.code
+
+        if exit_code == 0:
+            print("\n✅ Tests completados. Ver reporte de cobertura arriba.")
+        else:
+            print("\n❌ Algunos tests fallaron (ver detalles arriba).")
+
         self.pausar()
     
     def ver_documentacion(self):
@@ -158,45 +172,125 @@ Para más información, consulta README.md
         self.pausar()
     
     def ejemplo_personalizado(self):
-        """Permite al usuario ingresar sus propios datos"""
+        """Permite al usuario ingresar sus propias palabras en lugar de longitudes"""
         print("\n✏️  EJEMPLO PERSONALIZADO")
         print("-" * 80)
-        
+    
         try:
-            # Solicitar datos
-            print("\nIngresa las longitudes de las palabras separadas por espacios:")
-            print("Ejemplo: 5 3 4 6 2")
-            palabras_str = input("Palabras: ").strip()
-            palabras = [int(x) for x in palabras_str.split()]
-            
-            L = int(input("\nLongitud de línea (L): "))
+            # Solicitar palabras reales
+            print("\nIngresa las palabras separadas por espacios:")
+            print("Ejemplo: casa perro gato universidad")
+            texto = input("Palabras: ").strip()
+        
+            # Lista de palabras
+            palabras_texto = texto.split()
+            if not palabras_texto:
+                print("\n❌ No ingresaste ninguna palabra.")
+                self.pausar()
+                return
+        
+            # Convertir palabras a longitudes (número de caracteres)
+            palabras_longitudes = [len(p) for p in palabras_texto]
+        
+            print(f"\nPalabras ingresadas: {palabras_texto}")
+            print(f"Longitudes usadas internamente: {palabras_longitudes}")
+        
+            # Pedir parámetros del modelo
+            print("\nTen en cuenta que L es la longitud máxima de la línea en caracteres.")
+            L = int(input("Longitud de línea (L): "))
             b = float(input("Amplitud ideal de espacios (b): "))
-            
+        
             print("\n🔍 Resolviendo con tus parámetros...")
-            print(f"Palabras: {palabras}")
             print(f"L = {L}, b = {b}")
-            
+        
             from division_parrafos import DivisionParrafos, mostrar_solucion
             import time
-            
-            dp = DivisionParrafos(palabras, L, b)
-            
+        
+            dp = DivisionParrafos(palabras_longitudes, L, b)
+        
             # Resolver con iterativo (el más eficiente)
             inicio = time.perf_counter()
             costo, cortes = dp.resolver_iterativo()
             tiempo = time.perf_counter() - inicio
-            
+        
             print(f"\n✅ SOLUCIÓN ENCONTRADA")
-            print(f"Costo óptimo: {costo:.4f}")
+            print(f"Costo óptimo total: {costo:.4f}")
             print(f"Tiempo: {tiempo*1000:.4f} ms")
+        
+            # ----- Mostrar el texto formateado por líneas (con palabras reales) -----
+            print("\n📄 Párrafos formateados (con tus palabras):")
+            print("-" * 80)
+        
+            lineas_info = []
+            inicio_idx = 0
+            for corte in cortes:
+                # 'corte' es un índice 1-based del algoritmo
+                fin_idx = corte
+                linea_palabras = palabras_texto[inicio_idx:fin_idx]
+                linea_texto = " ".join(linea_palabras)
+                print(linea_texto)
             
-            mostrar_solucion(palabras, cortes, L, b)
+                # Guardar info para el detalle por parámetros
+                i = inicio_idx          # índice inicial 0-based
+                j = fin_idx - 1         # índice final 0-based
+                sum_long = sum(palabras_longitudes[i:fin_idx])
+                num_pal_linea = fin_idx - inicio_idx
+                num_espacios = max(num_pal_linea - 1, 0)
             
+                # b' solo tiene sentido si hay al menos un espacio
+                if num_espacios > 0:
+                    b_prima = (L - sum_long) / num_espacios
+                else:
+                    b_prima = None
+            
+                costo_linea = dp.calcular_costo_linea(i, j)
+            
+                lineas_info.append({
+                    "linea": len(lineas_info) + 1,
+                    "i": i,
+                    "j": j,
+                    "palabras": linea_palabras,
+                    "sum_long": sum_long,
+                    "num_espacios": num_espacios,
+                    "b_prima": b_prima,
+                    "costo_linea": costo_linea,
+                })
+            
+                inicio_idx = fin_idx
+        
+            print("-" * 80)
+        
+            # ----- Detalle por línea según los parámetros del modelo -----
+            print("\n📐 Detalle por línea (según L y b):")
+            print("-" * 80)
+            for info in lineas_info:
+                print(f"Línea {info['linea']}:")
+                print(f"  Palabras           : {' '.join(info['palabras'])}")
+                print(f"  Índices (1-based)  : {info['i'] + 1} a {info['j'] + 1}")
+                print(f"  Longitud palabras  : {info['sum_long']} caracteres")
+                print(f"  Número de espacios : {info['num_espacios']}")
+            
+                if info['b_prima'] is not None:
+                    print(f"  b' calculado       : {info['b_prima']:.4f}")
+                else:
+                    print("  b' calculado       : N/A (solo una palabra)")
+            
+                if info['costo_linea'] == float('inf'):
+                    print("  Costo de la línea  : inf (no cabe en la longitud L)")
+                else:
+                    print(f"  Costo de la línea  : {info['costo_linea']:.4f}")
+            
+                print("-" * 80)
+        
+            # ----- Representación interna original (opcional) -----
+            print("\n📏 Representación interna (longitudes):")
+            mostrar_solucion(palabras_longitudes, cortes, L, b)
+        
         except ValueError:
-            print("\n❌ Error: Entrada inválida. Usa números enteros/decimales.")
+            print("\n❌ Error: Entrada inválida. Usa números enteros/decimales para L y b.")
         except Exception as e:
             print(f"\n❌ Error: {e}")
-        
+    
         self.pausar()
     
     def pausar(self):
@@ -230,6 +324,7 @@ Para más información, consulta README.md
             else:
                 print("\n❌ Opción inválida. Intenta de nuevo.")
                 self.pausar()
+
 
 
 def verificar_dependencias():
