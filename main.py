@@ -21,6 +21,7 @@ class MenuPrincipal:
             '5': ('Ver documentación del proyecto', self.ver_documentacion),
             '6': ('Ejecutar TODO (casos + análisis + tests)', self.ejecutar_todo),
             '7': ('Ejemplo personalizado', self.ejemplo_personalizado),
+            '8': ('Stress test con entradas grandes', self.ejecutar_casos_grandes),
             '0': ('Salir', None)
         }
     
@@ -140,8 +141,10 @@ ARCHIVOS PRINCIPALES:
 - main.py                    : Este menú interactivo
 
 RESULTADOS GENERADOS:
-- analisis_division_parrafos.png  : Gráficas comparativas
-- resultados_benchmark.json       : Datos en JSON
+- analisis_division_parrafos.png          : Gráficas comparativas (tamaños pequeños/medios)
+- analisis_division_parrafos_stress.png   : Gráficas del stress test (tamaños grandes)
+- resultados_benchmark.json               : Datos en JSON (benchmark estándar)
+- resultados_benchmark_stress.json        : Datos en JSON (stress test)
 
 Para más información, consulta README.md
         """)
@@ -247,9 +250,9 @@ Para más información, consulta README.md
             
                 lineas_info.append({
                     "linea": len(lineas_info) + 1,
+                    "palabras": linea_palabras,
                     "i": i,
                     "j": j,
-                    "palabras": linea_palabras,
                     "sum_long": sum_long,
                     "num_espacios": num_espacios,
                     "b_prima": b_prima,
@@ -291,6 +294,116 @@ Para más información, consulta README.md
         except Exception as e:
             print(f"\n❌ Error: {e}")
     
+        self.pausar()
+
+    def ejecutar_casos_grandes(self):
+        """
+        Ejecuta ejemplos con entradas muy grandes para testear el comportamiento
+        de las implementaciones (stress test) y genera gráficas de n vs tiempo.
+        """
+        print("\n🚀 STRESS TEST CON ENTRADAS GRANDES")
+        print("=" * 80)
+
+        from division_parrafos import DivisionParrafos, ejecutar_y_medir
+        from analisis_graficas import AnalizadorRendimiento
+        import random
+
+        # Tamaños grandes: de 500 en 500 hasta 3500
+        tamanos = list(range(500, 3501, 500))  # [500, 1000, ..., 5000]
+        L = 60    # longitud de línea fija para las pruebas
+        b = 1.5   # amplitud ideal de espacios
+
+        resultados_stress = []
+
+        for n in tamanos:
+            print(f"\n📦 Instancia con n = {n} palabras")
+            print("-" * 80)
+            # Longitudes aleatorias de palabras entre 2 y 10 caracteres
+            palabras = [random.randint(2, 10) for _ in range(n)]
+            print(f"Primeras 10 longitudes: {palabras[:10]} ...")
+            print(f"L = {L}, b = {b}")
+
+            dp = DivisionParrafos(palabras, L, b)
+
+            resultados_alg = []
+            resultado_n = {
+                'n': n,
+                'algoritmos': {}
+            }
+
+            # Iterativo
+            res_iter = ejecutar_y_medir(dp.resolver_iterativo, f"Iterativo (DP)      n={n}")
+            resultados_alg.append(res_iter)
+            if res_iter['exito'] and res_iter['costo'] is not None:
+                resultado_n['algoritmos']['Iterativo'] = {
+                    'tiempo': res_iter['tiempo'],
+                    'costo': res_iter['costo']
+                }
+
+            # Divide y Vencerás
+            res_dyv = ejecutar_y_medir(dp.resolver_divide_venceras, f"Divide y Vencerás  n={n}")
+            resultados_alg.append(res_dyv)
+            if res_dyv['exito'] and res_dyv['costo'] is not None:
+                resultado_n['algoritmos']['Divide y Vencerás'] = {
+                    'tiempo': res_dyv['tiempo'],
+                    'costo': res_dyv['costo']
+                }
+
+            # Opcional: también recursivo y exhaustivo si el usuario quiere
+            resp = input(
+                "\n¿Intentar también Recursivo Puro y Exhaustivo para este tamaño? "
+                "(puede tardar MUCHÍSIMO o no terminar) [s/N]: "
+            ).strip().lower()
+
+            if resp == "s":
+                res_rec = ejecutar_y_medir(dp.resolver_recursivo, f"Recursivo Puro      n={n}")
+                resultados_alg.append(res_rec)
+                if res_rec['exito'] and res_rec['costo'] is not None:
+                    resultado_n['algoritmos']['Recursivo'] = {
+                        'tiempo': res_rec['tiempo'],
+                        'costo': res_rec['costo']
+                    }
+
+                res_exh = ejecutar_y_medir(dp.resolver_exhaustivo, f"Exhaustivo          n={n}")
+                resultados_alg.append(res_exh)
+                if res_exh['exito'] and res_exh['costo'] is not None:
+                    resultado_n['algoritmos']['Exhaustivo'] = {
+                        'tiempo': res_exh['tiempo'],
+                        'costo': res_exh['costo']
+                    }
+
+            print("\n📊 Resumen de resultados (n = {}):".format(n))
+            print("-" * 80)
+            for res in resultados_alg:
+                if res["exito"]:
+                    costo_str = f"{res['costo']:.4f}" if res["costo"] is not None else "N/A"
+                    print(
+                        f"{res['nombre']:30} | "
+                        f"Costo: {costo_str:>10} | "
+                        f"Tiempo: {res['tiempo']*1000:10.4f} ms"
+                    )
+                else:
+                    print(f"{res['nombre']:30} | ERROR: {res['error']}")
+
+            resultados_stress.append(resultado_n)
+
+        print("\n✅ Stress test finalizado.")
+
+        # ----- Generar gráficas y tabla para estos resultados grandes -----
+        print("\n📊 Generando análisis y gráficas del stress test (n grandes)...")
+        analizador = AnalizadorRendimiento()
+        analizador.resultados = resultados_stress
+
+        # Tabla comparativa y JSON específico del stress test
+        analizador.generar_tabla_comparativa()
+        analizador.guardar_resultados_json('resultados_benchmark_stress.json')
+
+        # Gráficas específicas del stress test
+        analizador.generar_graficas(
+            guardar=True,
+            filename='analisis_division_parrafos_stress.png'
+        )
+
         self.pausar()
     
     def pausar(self):

@@ -5,9 +5,11 @@ Implementaciones: Iterativa, Recursiva, Divide y Vencerás, Exhaustiva
 """
 
 import time
-import math
 from typing import List, Tuple, Dict
 import sys
+
+TIEMPO_UMBRAL_LENTO = 30.0  # segundos
+
 
 class DivisionParrafos:
     """Clase principal para resolver el problema de División en Párrafos"""
@@ -96,7 +98,7 @@ class DivisionParrafos:
                     parent[i] = j
         
         # Reconstruir solución
-        puntos_corte = []
+        puntos_corte: List[int] = []
         i = n
         while i > 0:
             puntos_corte.append(i)
@@ -125,7 +127,7 @@ class DivisionParrafos:
                 return 0.0, []
             
             mejor_costo = float('inf')
-            mejor_corte = []
+            mejor_corte: List[int] = []
             
             # Probar todas las posibles siguientes líneas
             for siguiente in range(pos + 1, self.k + 1):
@@ -153,7 +155,7 @@ class DivisionParrafos:
         Returns:
             (costo_minimo, puntos_de_corte)
         """
-        memo = {}
+        memo: Dict[Tuple[int, int], Tuple[float, List[int]]] = {}
         
         def divide_aux(inicio: int, fin: int) -> Tuple[float, List[int]]:
             """
@@ -166,7 +168,7 @@ class DivisionParrafos:
                 return memo[(inicio, fin)]
             
             mejor_costo = float('inf')
-            mejor_corte = []
+            mejor_corte: List[int] = []
             
             # Dividir el problema
             # Probar diferentes puntos de división
@@ -202,7 +204,7 @@ class DivisionParrafos:
             if n == 0:
                 return [[]]
             
-            particiones = []
+            particiones: List[List[int]] = []
             for i in range(1, n + 1):
                 for resto in generar_particiones(n - i):
                     particiones.append([i] + resto)
@@ -210,7 +212,7 @@ class DivisionParrafos:
             return particiones
         
         mejor_costo = float('inf')
-        mejor_particion = []
+        mejor_particion: List[int] = []
         
         # Generar todas las particiones posibles
         for particion in generar_particiones(self.k):
@@ -232,7 +234,7 @@ class DivisionParrafos:
                 mejor_particion = particion
         
         # Convertir partición a puntos de corte
-        puntos_corte = []
+        puntos_corte: List[int] = []
         acum = 0
         for tamaño in mejor_particion:
             acum += tamaño
@@ -241,18 +243,29 @@ class DivisionParrafos:
         return mejor_costo, puntos_corte
 
 
-def ejecutar_y_medir(algoritmo_func, nombre: str) -> Dict:
+def ejecutar_y_medir(algoritmo_func, nombre: str, umbral_lento: float = TIEMPO_UMBRAL_LENTO) -> Dict:
     """
     Ejecuta un algoritmo y mide su rendimiento.
+    
+    Muestra una alerta si el tiempo de ejecución supera 'umbral_lento'.
     
     Returns:
         Diccionario con resultados y métricas
     """
+    print(f"\n▶ Ejecutando {nombre}...")
     inicio = time.perf_counter()
     try:
         costo, cortes = algoritmo_func()
         tiempo = time.perf_counter() - inicio
-        
+
+        # Advertencia si se demoró "mucho"
+        if tiempo > umbral_lento:
+            print(
+                f"⚠️ Aviso: {nombre} está tardando más de lo normal "
+                f"({tiempo:.3f} s). Esto es esperable para algoritmos de "
+                f"alta complejidad (por ejemplo, recursivo puro o exhaustivo)."
+            )
+
         return {
             'nombre': nombre,
             'costo': costo,
@@ -263,6 +276,7 @@ def ejecutar_y_medir(algoritmo_func, nombre: str) -> Dict:
         }
     except Exception as e:
         tiempo = time.perf_counter() - inicio
+        print(f"❌ Error ejecutando {nombre}: {e}")
         return {
             'nombre': nombre,
             'costo': None,
@@ -319,7 +333,7 @@ def ejecutar_comparacion():
     
     dp1 = DivisionParrafos(palabras1, L1, b1)
     
-    resultados1 = []
+    resultados1: List[Dict] = []
     resultados1.append(ejecutar_y_medir(dp1.resolver_iterativo, "Iterativo (DP)"))
     resultados1.append(ejecutar_y_medir(dp1.resolver_recursivo, "Recursivo Puro"))
     resultados1.append(ejecutar_y_medir(dp1.resolver_divide_venceras, "Divide y Vencerás"))
@@ -333,11 +347,15 @@ def ejecutar_comparacion():
         else:
             print(f"{res['nombre']:25} | ERROR: {res['error']}")
     
-    # Mostrar solución óptima
-    sol_optima = next(r for r in resultados1 if r['exito'])
-    mostrar_solucion(palabras1, sol_optima['cortes'], L1, b1)
+    # Mostrar solución óptima (menor costo entre los que terminaron bien)
+    sol_optima1 = min(
+        (r for r in resultados1 if r['exito']),
+        key=lambda r: r['costo']
+    )
+    print(f"\n✅ Mejor solución (CASO 1): {sol_optima1['nombre']} con costo {sol_optima1['costo']:.4f}")
+    mostrar_solucion(palabras1, sol_optima1['cortes'], L1, b1)
     
-    # Ejemplo 2: Mediano (solo algoritmos eficientes)
+    # Ejemplo 2: Mediano (también ejecuta todos los algoritmos)
     print("\n\n📝 CASO DE PRUEBA 2: Entrada mediana")
     print("-" * 70)
     palabras2 = [3, 4, 2, 5, 3, 4, 6, 2, 3, 5]
@@ -350,18 +368,25 @@ def ejecutar_comparacion():
     
     dp2 = DivisionParrafos(palabras2, L2, b2)
     
-    resultados2 = []
+    resultados2: List[Dict] = []
     resultados2.append(ejecutar_y_medir(dp2.resolver_iterativo, "Iterativo (DP)"))
+    resultados2.append(ejecutar_y_medir(dp2.resolver_recursivo, "Recursivo Puro"))
     resultados2.append(ejecutar_y_medir(dp2.resolver_divide_venceras, "Divide y Vencerás"))
-    print("\nNOTA: Recursivo puro y exhaustivo omitidos (demasiado lentos)")
+    resultados2.append(ejecutar_y_medir(dp2.resolver_exhaustivo, "Exhaustivo"))
     
     print("\n📊 RESULTADOS:")
     print("-" * 70)
     for res in resultados2:
         if res['exito']:
             print(f"{res['nombre']:25} | Costo: {res['costo']:10.4f} | Tiempo: {res['tiempo']*1000:10.4f} ms")
+        else:
+            print(f"{res['nombre']:25} | ERROR: {res['error']}")
     
-    sol_optima2 = next(r for r in resultados2 if r['exito'])
+    sol_optima2 = min(
+        (r for r in resultados2 if r['exito']),
+        key=lambda r: r['costo']
+    )
+    print(f"\n✅ Mejor solución (CASO 2): {sol_optima2['nombre']} con costo {sol_optima2['costo']:.4f}")
     mostrar_solucion(palabras2, sol_optima2['cortes'], L2, b2)
     
     # Resumen de complejidades
@@ -372,7 +397,7 @@ def ejecutar_comparacion():
     print(f"{'Iterativo (DP)':<25} | {'O(n²)':<20} | Programación dinámica bottom-up")
     print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | Sin memorización, exponencial")
     print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | Con memorización (memoization)")
-    print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | Bell number, extremadamente lento")
+    print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | Números de Bell, extremadamente lento")
     
     print("\n\n✅ CONCLUSIÓN:")
     print("-" * 70)

@@ -97,7 +97,7 @@ class AnalizadorRendimiento:
             
             self.resultados.append(resultado)
     
-    def generar_graficas(self, guardar: bool = True):
+    def generar_graficas(self, guardar: bool = True, filename: str = 'analisis_division_parrafos.png'):
         """Genera todas las gráficas de análisis"""
         if not self.resultados:
             print("❌ No hay resultados para graficar. Ejecuta benchmark primero.")
@@ -134,8 +134,8 @@ class AnalizadorRendimiento:
         plt.tight_layout()
         
         if guardar:
-            plt.savefig('analisis_division_parrafos.png', dpi=300, bbox_inches='tight')
-            print("\n✅ Gráfica guardada como 'analisis_division_parrafos.png'")
+            plt.savefig(filename, dpi=300, bbox_inches='tight')
+            print(f"\n✅ Gráfica guardada como '{filename}'")
         
         plt.show()
     
@@ -442,7 +442,7 @@ def main():
     
     # Generar gráficas
     print("\n📊 Generando gráficas...")
-    analizador.generar_graficas(guardar=True)
+    analizador.generar_graficas(guardar=True, filename='analisis_division_parrafos.png')
     
     print("\n" + "=" * 100)
     print("✅ ANÁLISIS COMPLETO FINALIZADO")
