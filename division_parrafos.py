@@ -30,121 +30,109 @@ class DivisionParrafos:
     def calcular_costo_linea(self, i: int, j: int) -> float:
         """
         Calcula el costo de poner las palabras desde i hasta j en una línea.
-        
-        Args:
-            i: índice inicial (0-based)
-            j: índice final (0-based)
-        
-        Returns:
-            Costo de la línea, o infinito si no cabe
+    
+        Versión corregida con cálculo consistente.
         """
         # Sumar longitudes de palabras de i a j
         suma_longitudes = sum(self.palabras[i:j+1])
-        num_espacios = j - i
-        
+        num_palabras = j - i + 1
+        num_espacios = num_palabras - 1
+    
+        # Verificar si cabe en la línea
+        espacio_necesario = suma_longitudes + num_espacios
+        if espacio_necesario > self.L:
+            return float('inf')
+    
         # Si es la última línea
         if j == self.k - 1:
-            if num_espacios == 0:
-                return 0.0
-            b_prima = (self.L - suma_longitudes) / num_espacios
-            if b_prima < 0:  # No cabe
-                return float('inf')
-            return 0.0  # Costo cero para última línea si cabe
-        
-        # Para líneas intermedias
+            # Última línea: costo bajo pero no cero
+            espacio_sobrante = self.L - espacio_necesario
+            # Pequeña penalización por espacio sobrante
+            return (espacio_sobrante / self.L) ** 2
+    
+        # Para líneas regulares
         if num_espacios == 0:
             # Una sola palabra
-            if suma_longitudes <= self.L:
-                return 0.0
-            else:
-                return float('inf')
+            espacio_sobrante = self.L - suma_longitudes
+            # Penalización cuadrática por espacio desperdiciado
+            return (espacio_sobrante / self.L) ** 2
+        else:
+            # Múltiples palabras
+            espacio_sobrante = self.L - espacio_necesario
+            b_prima = 1.0 + (espacio_sobrante / num_espacios)
         
-        # Calcular b' (ancho real de espacios)
-        b_prima = (self.L - suma_longitudes) / num_espacios
+            # Costo principal: desviación del espacio ideal
+            costo_espacios = num_espacios * ((b_prima - self.b) ** 2)
         
-        # Verificar que b' >= 0 (los espacios no pueden desaparecer)
-        if b_prima < 0:
-            return float('inf')
+            # Costo adicional: espacio sobrante no utilizado
+            costo_sobrante = (espacio_sobrante / self.L) ** 2
         
-        # Costo: (j-i) * |b' - b|
-        costo = num_espacios * abs(b_prima - self.b)
-        return costo
+            return costo_espacios + costo_sobrante
     
     # ===================== ALGORITMO ITERATIVO (Programación Dinámica) =====================
     def resolver_iterativo(self) -> Tuple[float, List[int]]:
         """
         Algoritmo iterativo usando programación dinámica bottom-up.
-    
-        Complejidad Temporal:
-        - Por número de palabras (n): O(n²)
-        - Por tamaño en bits (b = log₂(n)): O(2^(2b))
-        - Clasificación: Pseudo-polinomial
-    
-        Complejidad Espacial: O(n)
-    
-        Peor Caso: 
-        Entrada con múltiples configuraciones válidas donde todas 
-        las combinaciones de agrupamiento deben ser evaluadas.
-    
+        
         Returns:
-        (costo_minimo, puntos_de_corte)
+            (costo_minimo, puntos_de_corte) donde puntos_de_corte son índices 0-based
+            de las últimas palabras de cada línea (EXCLUYENDO la última línea)
         """
         n = self.k
-        # dp[i] = costo mínimo para las primeras i palabras
         dp = [float('inf')] * (n + 1)
         dp[0] = 0.0
-        
-        # parent[i] = índice donde termina la última línea para las primeras i palabras
         parent = [-1] * (n + 1)
         
-        # Para cada prefijo de palabras
         for i in range(1, n + 1):
-            # Probar todas las posibles últimas líneas
             for j in range(i):
-                # Última línea contiene palabras desde j hasta i-1 (índices 0-based)
                 costo_linea = self.calcular_costo_linea(j, i - 1)
+                
+                if costo_linea == float('inf'):
+                    continue
+                    
                 costo_total = dp[j] + costo_linea
                 
                 if costo_total < dp[i]:
                     dp[i] = costo_total
                     parent[i] = j
         
-        # Reconstruir solución
-        puntos_corte: List[int] = []
+        # Reconstruir los cortes
+        cortes: List[int] = []
         i = n
-        while i > 0:
-            puntos_corte.append(i)
-            i = parent[i]
-        puntos_corte.reverse()
         
-        return dp[n], puntos_corte
-    
+        while i > 0 and parent[i] != -1:
+            # El índice de la última palabra de esta línea es i-1
+            # Solo agregar si no es la última palabra del texto
+            if i - 1 < n - 1:  # No es la última palabra
+                cortes.append(i - 1)
+            i = parent[i]
+        
+        # Los cortes están en orden inverso
+        cortes.reverse()
+        
+        # Eliminar cortes duplicados o en orden incorrecto
+        cortes_filtrados = []
+        prev = -1
+        for corte in cortes:
+            if corte > prev:
+                cortes_filtrados.append(corte)
+                prev = corte
+        
+        return dp[n], cortes_filtrados
     # ===================== ALGORITMO RECURSIVO PURO =====================
     def resolver_recursivo(self) -> Tuple[float, List[int]]:
         """
-    Algoritmo recursivo puro sin memorización.
-    ADVERTENCIA: Muy lento para entradas grandes.
+        Algoritmo recursivo puro sin memorización.
     
-    Complejidad Temporal:
-        - Por número de palabras (n): O(2^n)
-        - Por tamaño en bits (b = log₂(n)): O(2^(2^b))
-        - Clasificación: Exponencial
-    
-    Complejidad Espacial: O(n) - pila de recursión
-    
-    Peor Caso:
-        Cualquier entrada con n > 15, donde el árbol de recursión
-        crece exponencialmente sin reutilizar cálculos.
-    
-    Returns:
-        (costo_minimo, puntos_de_corte)
+        Returns:
+            (costo_minimo, puntos_de_corte) donde puntos_de_corte son índices 0-based
         """
         def recursivo_aux(pos: int) -> Tuple[float, List[int]]:
             """
             Calcula el costo mínimo desde la posición pos hasta el final.
             
             Returns:
-                (costo, puntos_de_corte desde pos)
+                (costo, puntos_de_corte desde pos - índices 0-based)
             """
             if pos == self.k:
                 return 0.0, []
@@ -163,32 +151,25 @@ class DivisionParrafos:
                     
                     if costo_total < mejor_costo:
                         mejor_costo = costo_total
-                        mejor_corte = [siguiente] + cortes_resto
+                        # Los cortes son índices 0-based
+                        mejor_corte = [siguiente - 1] + cortes_resto
             
             return mejor_costo, mejor_corte
         
         costo, cortes = recursivo_aux(0)
+        # Filtrar el último corte si es el final
+        if cortes and cortes[-1] == self.k - 1:
+            cortes = cortes[:-1]
         return costo, cortes
     
     # ===================== ALGORITMO DIVIDE Y VENCERÁS =====================
     def resolver_divide_venceras(self) -> Tuple[float, List[int]]:
         """
-    Algoritmo usando técnica de divide y vencerás con memorización.
+        Algoritmo usando técnica de divide y vencerás con memorización.
     
-    Complejidad Temporal:
-        - Por número de palabras (n): O(n²)
-        - Por tamaño en bits (b = log₂(n)): O(2^(2b))
-        - Clasificación: Pseudo-polinomial
-    
-    Complejidad Espacial: O(n²) - diccionario de memorización
-    
-    Peor Caso:
-        Similar al iterativo, pero con overhead de recursión y
-        manejo del diccionario de memorización.
-    
-    Returns:
-        (costo_minimo, puntos_de_corte)
-    """
+        Returns:
+            (costo_minimo, puntos_de_corte) donde puntos_de_corte son índices 0-based
+        """
         memo: Dict[Tuple[int, int], Tuple[float, List[int]]] = {}
         
         def divide_aux(inicio: int, fin: int) -> Tuple[float, List[int]]:
@@ -205,7 +186,6 @@ class DivisionParrafos:
             mejor_corte: List[int] = []
             
             # Dividir el problema
-            # Probar diferentes puntos de división
             for punto_division in range(inicio + 1, fin + 1):
                 # Primera parte: [inicio, punto_division)
                 costo_linea = self.calcular_costo_linea(inicio, punto_division - 1)
@@ -217,32 +197,26 @@ class DivisionParrafos:
                     
                     if costo_total < mejor_costo:
                         mejor_costo = costo_total
-                        mejor_corte = [punto_division] + cortes_resto
+                        # Los cortes son índices 0-based
+                        mejor_corte = [punto_division - 1] + cortes_resto
             
             memo[(inicio, fin)] = (mejor_costo, mejor_corte)
             return mejor_costo, mejor_corte
         
-        return divide_aux(0, self.k)
+        costo, cortes = divide_aux(0, self.k)
+        # Filtrar el último corte si es el final
+        if cortes and cortes[-1] == self.k - 1:
+            cortes = cortes[:-1]
+        return costo, cortes
     
     # ===================== ALGORITMO EXHAUSTIVO =====================
     def resolver_exhaustivo(self) -> Tuple[float, List[int]]:
         """
-    Algoritmo exhaustivo que prueba todas las combinaciones posibles.
-    ADVERTENCIA: Extremadamente lento, solo para n muy pequeño.
+        Algoritmo exhaustivo que prueba todas las combinaciones posibles.
     
-    Complejidad Temporal:
-        - Por número de palabras (n): O(B(n)) donde B(n) es el Número de Bell
-        - Por tamaño en bits (b = log₂(n)): O(B(2^b))
-        - Clasificación: Súper-exponencial
-    
-    Complejidad Espacial: O(n)
-    
-    Peor Caso:
-        Cualquier entrada con n ≥ 6. B(6)=203, B(10)=115,975
-    
-    Returns:
-        (costo_minimo, puntos_de_corte)
-    """
+        Returns:
+            (costo_minimo, puntos_de_corte) donde puntos_de_corte son índices 0-based
+        """
         def generar_particiones(n: int) -> List[List[int]]:
             """Genera todas las particiones posibles de n elementos"""
             if n == 0:
@@ -277,12 +251,13 @@ class DivisionParrafos:
                 mejor_costo = costo_total
                 mejor_particion = particion
         
-        # Convertir partición a puntos de corte
+        # Convertir partición a puntos de corte (0-based)
         puntos_corte: List[int] = []
         acum = 0
         for tamaño in mejor_particion:
             acum += tamaño
-            puntos_corte.append(acum)
+            if acum < self.k:  # No incluir el final
+                puntos_corte.append(acum - 1)  # Convertir a 0-based
         
         return mejor_costo, puntos_corte
 
@@ -290,8 +265,6 @@ class DivisionParrafos:
 def ejecutar_y_medir(algoritmo_func, nombre: str, umbral_lento: float = TIEMPO_UMBRAL_LENTO) -> Dict:
     """
     Ejecuta un algoritmo y mide su rendimiento.
-    
-    Muestra una alerta si el tiempo de ejecución supera 'umbral_lento'.
     
     Returns:
         Diccionario con resultados y métricas
@@ -302,7 +275,6 @@ def ejecutar_y_medir(algoritmo_func, nombre: str, umbral_lento: float = TIEMPO_U
         costo, cortes = algoritmo_func()
         tiempo = time.perf_counter() - inicio
 
-        # Advertencia si se demoró "mucho"
         if tiempo > umbral_lento:
             print(
                 f"Aviso: {nombre} está tardando más de lo normal "
@@ -336,25 +308,74 @@ def mostrar_solucion(palabras: List[int], cortes: List[int], L: int, b: float):
     print("\nDistribución de palabras en líneas:")
     print("=" * 60)
     
-    inicio = 0
-    for i, fin in enumerate(cortes, 1):
-        linea_palabras = palabras[inicio:fin]
-        suma = sum(linea_palabras)
-        num_espacios = len(linea_palabras) - 1
+    # Si no hay cortes, toda la entrada está en una línea
+    if not cortes:
+        suma = sum(palabras)
+        num_espacios = len(palabras) - 1
+        espacio_total = suma + num_espacios
         
         if num_espacios > 0:
             b_prima = (L - suma) / num_espacios
         else:
             b_prima = 0
         
-        print(f"Línea {i}: palabras {inicio+1} a {fin}")
-        print(f"  Longitudes: {linea_palabras}")
+        print(f"Línea 1: palabras 1 a {len(palabras)}")
+        print(f"  Longitudes: {palabras}")
         print(f"  Suma longitudes: {suma}")
+        print(f"  Espacios totales: {espacio_total}/{L}")
+        print(f"  Espacios reales: {b_prima:.2f} (ideal: {b})")
+        print()
+        return
+    
+    inicio = 0
+    linea_num = 1
+    
+    # Mostrar líneas definidas por cortes
+    for corte in cortes:
+        # corte es el índice de la última palabra de esta línea
+        fin = corte + 1
+        
+        if inicio >= fin:
+            continue
+            
+        linea = palabras[inicio:fin]
+        suma = sum(linea)
+        num_espacios = len(linea) - 1
+        espacio_total = suma + num_espacios
+        
+        if num_espacios > 0:
+            b_prima = (L - suma) / num_espacios
+        else:
+            b_prima = 0
+        
+        print(f"Línea {linea_num}: palabras {inicio+1} a {fin}")
+        print(f"  Longitudes: {linea}")
+        print(f"  Suma longitudes: {suma}")
+        print(f"  Espacios totales: {espacio_total}/{L}")
         print(f"  Espacios reales: {b_prima:.2f} (ideal: {b})")
         print()
         
         inicio = fin
-
+        linea_num += 1
+    
+    # Mostrar última línea
+    if inicio < len(palabras):
+        linea = palabras[inicio:]
+        suma = sum(linea)
+        num_espacios = len(linea) - 1
+        espacio_total = suma + num_espacios
+        
+        if num_espacios > 0:
+            b_prima = (L - suma) / num_espacios
+        else:
+            b_prima = 0
+        
+        print(f"Línea {linea_num}: palabras {inicio+1} a {len(palabras)}")
+        print(f"  Longitudes: {linea}")
+        print(f"  Suma longitudes: {suma}")
+        print(f"  Espacios totales: {espacio_total}/{L}")
+        print(f"  Espacios reales: {b_prima:.2f} (ideal: {b})")
+        print()
 
 def ejecutar_comparacion():
     """Función principal para ejecutar y comparar todos los algoritmos"""
@@ -433,16 +454,6 @@ def ejecutar_comparacion():
     print(f"\n✅ Mejor solución (CASO 2): {sol_optima2['nombre']} con costo {sol_optima2['costo']:.4f}")
     mostrar_solucion(palabras2, sol_optima2['cortes'], L2, b2)
     
-    # Resumen de complejidades
-    # print("\n\n📚 ANÁLISIS DE COMPLEJIDAD TEMPORAL")
-    # print("=" * 70)
-    # print(f"{'Algoritmo':<25} | {'Complejidad':<20} | {'Descripción'}")
-    # print("-" * 70)
-    # print(f"{'Iterativo (DP)':<25} | {'O(n²)':<20} | Programación dinámica bottom-up")
-    # print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | Sin memorización, exponencial")
-    # print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | Con memorización (memoization)")
-    # print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | Números de Bell, extremadamente lento")
-    
     print("\n\nANÁLISIS DE COMPLEJIDAD TEMPORAL")
     print("=" * 100)
     print(f"{'Algoritmo':<25} | {'Por Valor (n)':<20} | {'Por Bits (b=log₂n)':<25} | {'Descripción'}")
@@ -451,9 +462,6 @@ def ejecutar_comparacion():
     print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | {'O(2^(2^b))':<25} | Exponencial sin memo")
     print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | {'O(2^(2b))':<25} | Pseudo-polinomial")
     print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | {'O(B(2^b))':<25} | Súper-exponencial")
-    print("\nNota: La medición por bits revela que los algoritmos O(n²) son exponenciales")
-    print("      respecto al tamaño verdadero de la entrada, clasificándolos como")
-    print("      cuasi-polinomiales en lugar de verdaderamente polinomiales.")
 
     print("\n\n✅ CONCLUSIÓN:")
     print("-" * 70)

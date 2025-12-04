@@ -3,19 +3,19 @@
     "n": 3,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 3.930006641894579e-05,
+        "tiempo": 3.6400044336915016e-05,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 6.590003613382578e-05,
+        "tiempo": 5.709996912628412e-05,
         "costo": 0.0
       },
       "Recursivo": {
-        "tiempo": 4.780001472681761e-05,
+        "tiempo": 4.329998046159744e-05,
         "costo": 0.0
       },
       "Exhaustivo": {
-        "tiempo": 5.5900076404213905e-05,
+        "tiempo": 4.3199979700148106e-05,
         "costo": 0.0
       }
     }
@@ -24,19 +24,19 @@
     "n": 5,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 9.370001498609781e-05,
+        "tiempo": 4.5199994929134846e-05,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 8.110003545880318e-05,
+        "tiempo": 7.099995855242014e-05,
         "costo": 0.0
       },
       "Recursivo": {
-        "tiempo": 0.00010730000212788582,
+        "tiempo": 8.800008799880743e-05,
         "costo": 0.0
       },
       "Exhaustivo": {
-        "tiempo": 0.0001194999786093831,
+        "tiempo": 0.00012569990940392017,
         "costo": 0.0
       }
     }
@@ -45,15 +45,15 @@
     "n": 8,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 8.950009942054749e-05,
+        "tiempo": 0.0002877999795600772,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.00020240002777427435,
+        "tiempo": 0.00013749999925494194,
         "costo": 0.0
       },
       "Recursivo": {
-        "tiempo": 0.0006077999714761972,
+        "tiempo": 0.00045169994700700045,
         "costo": 0.0
       }
     }
@@ -62,11 +62,11 @@
     "n": 10,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.00012240000069141388,
+        "tiempo": 0.00011330004781484604,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.0008225999772548676,
+        "tiempo": 0.00020619994029402733,
         "costo": 0.0
       }
     }
@@ -75,11 +75,11 @@
     "n": 15,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.00029550003819167614,
+        "tiempo": 0.00023330003023147583,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.00045679998584091663,
+        "tiempo": 0.00031749997287988663,
         "costo": 0.0
       }
     }
@@ -88,11 +88,11 @@
     "n": 20,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.00043130002450197935,
+        "tiempo": 0.000331499963067472,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.000710400054231286,
+        "tiempo": 0.0009138999739661813,
         "costo": 0.0
       }
     }
@@ -101,11 +101,11 @@
     "n": 30,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.0009816000238060951,
+        "tiempo": 0.0007830000249668956,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.000929499976336956,
+        "tiempo": 0.0008126000175252557,
         "costo": 0.0
       }
     }
@@ -114,11 +114,11 @@
     "n": 40,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.012851200066506863,
+        "tiempo": 0.0010309999343007803,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.0020637999987229705,
+        "tiempo": 0.0016696000238880515,
         "costo": 0.0
       }
     }
