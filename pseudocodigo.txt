@@ -1,0 +1,118 @@
+### 1er algoritmo ###
+DP-ITERATIVO(palabras, L, b):
+    n ← número de palabras
+    dp[0..n] ← +∞
+    parent[0..n] ← -1
+    dp[0] ← 0
+
+    para i ← 1 hasta n:
+        para j ← 0 hasta i-1:
+            costo_linea ← COSTO_LINEA(j, i-1)
+            si costo_linea < +∞ y dp[j] + costo_linea < dp[i]:
+                dp[i] ← dp[j] + costo_linea
+                parent[i] ← j
+
+    // reconstrucción de cortes
+    puntos_corte ← []
+    i ← n
+    mientras i > 0:
+        puntos_corte.agregar(i)
+        i ← parent[i]
+    invertir(puntos_corte)
+
+    devolver (dp[n], puntos_corte)
+
+################################
+
+#### 2do codigo ####
+
+RECURSIVO-AUX(pos):
+    si pos == n:
+        devolver (0, [])
+
+    mejor_costo ← +∞
+    mejor_corte ← []
+
+    para siguiente ← pos+1 hasta n:
+        costo_linea ← COSTO_LINEA(pos, siguiente-1)
+        si costo_linea < +∞:
+            (costo_resto, cortes_resto) ← RECURSIVO-AUX(siguiente)
+            costo_total ← costo_linea + costo_resto
+            si costo_total < mejor_costo:
+                mejor_costo ← costo_total
+                mejor_corte ← [siguiente] + cortes_resto
+
+    devolver (mejor_costo, mejor_corte)
+
+RECURSIVO():
+    devolver RECURSIVO-AUX(0)
+
+################################
+
+### 3er codigo ###
+
+DIVIDE-AUX(inicio, fin):
+    si inicio >= fin:
+        devolver (0, [])
+
+    si (inicio, fin) ∈ memo:
+        devolver memo[(inicio, fin)]
+
+    mejor_costo ← +∞
+    mejor_corte ← []
+
+    para punto_div ← inicio+1 hasta fin:
+        costo_linea ← COSTO_LINEA(inicio, punto_div-1)
+        si costo_linea < +∞:
+            (costo_resto, cortes_resto) ← DIVIDE-AUX(punto_div, fin)
+            costo_total ← costo_linea + costo_resto
+            si costo_total < mejor_costo:
+                mejor_costo ← costo_total
+                mejor_corte ← [punto_div] + cortes_resto
+
+    memo[(inicio, fin)] ← (mejor_costo, mejor_corte)
+    devolver (mejor_costo, mejor_corte)
+
+DIVIDE-VENCERAS():
+    devolver DIVIDE-AUX(0, n)
+
+################################
+
+### 4to codigo ###
+
+GENERAR-PARTICIONES(n):
+    si n == 0:
+        devolver [[]]
+    particiones ← []
+    para i ← 1 hasta n:
+        para cada resto en GENERAR-PARTICIONES(n - i):
+            particiones.agregar([i] + resto)
+    devolver particiones
+
+EXHAUSTIVO():
+    mejor_costo ← +∞
+    mejor_particion ← []
+
+    para cada particion en GENERAR-PARTICIONES(n):
+        costo_total ← 0
+        pos ← 0
+        valida ← verdadero
+        para cada tamaño en particion:
+            costo_linea ← COSTO_LINEA(pos, pos + tamaño - 1)
+            si costo_linea == +∞:
+                valida ← falso
+                romper
+            costo_total ← costo_total + costo_linea
+            pos ← pos + tamaño
+        si valida y costo_total < mejor_costo:
+            mejor_costo ← costo_total
+            mejor_particion ← particion
+
+    // convertir tamaños de línea a puntos de corte
+    puntos_corte ← []
+    acum ← 0
+    para cada tamaño en mejor_particion:
+        acum ← acum + tamaño
+        puntos_corte.agregar(acum)
+
+    devolver (mejor_costo, puntos_corte)
