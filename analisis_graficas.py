@@ -10,6 +10,8 @@ import numpy as np
 from typing import List
 from division_parrafos import DivisionParrafos
 import json
+import math
+
 
 
 class AnalizadorRendimiento:
@@ -32,7 +34,7 @@ class AnalizadorRendimiento:
         print("=" * 80)
         
         for n in tamaños:
-            print(f"\n🔍 Probando con n={n} palabras...")
+            print(f"\nProbando con n={n} palabras...")
             
             # Generar palabras aleatorias pero reproducibles
             np.random.seed(42)
@@ -46,7 +48,7 @@ class AnalizadorRendimiento:
             }
             
             # Iterativo (siempre ejecutar)
-            print("  ⏱️  Ejecutando Iterativo...")
+            print(" Ejecutando Iterativo...")
             inicio = time.perf_counter()
             costo_iter, _ = dp.resolver_iterativo()
             tiempo_iter = time.perf_counter() - inicio
@@ -57,7 +59,7 @@ class AnalizadorRendimiento:
             print(f"     ✓ Completado en {tiempo_iter*1000:.2f} ms")
             
             # Divide y Vencerás (siempre ejecutar)
-            print("  ⏱️  Ejecutando Divide y Vencerás...")
+            print("  Ejecutando Divide y Vencerás...")
             inicio = time.perf_counter()
             costo_dyv, _ = dp.resolver_divide_venceras()
             tiempo_dyv = time.perf_counter() - inicio
@@ -69,7 +71,7 @@ class AnalizadorRendimiento:
             
             # Recursivo (solo para n pequeño)
             if n <= 8:
-                print("  ⏱️  Ejecutando Recursivo Puro...")
+                print("   Ejecutando Recursivo Puro...")
                 inicio = time.perf_counter()
                 costo_rec, _ = dp.resolver_recursivo()
                 tiempo_rec = time.perf_counter() - inicio
@@ -79,11 +81,11 @@ class AnalizadorRendimiento:
                 }
                 print(f"     ✓ Completado en {tiempo_rec*1000:.2f} ms")
             else:
-                print("     ⚠️  Recursivo omitido (n demasiado grande)")
+                print("    Recursivo omitido (n demasiado grande)")
             
             # Exhaustivo (solo para n muy pequeño)
             if n <= 5:
-                print("  ⏱️  Ejecutando Exhaustivo...")
+                print("    Ejecutando Exhaustivo...")
                 inicio = time.perf_counter()
                 costo_exh, _ = dp.resolver_exhaustivo()
                 tiempo_exh = time.perf_counter() - inicio
@@ -93,7 +95,7 @@ class AnalizadorRendimiento:
                 }
                 print(f"     ✓ Completado en {tiempo_exh*1000:.2f} ms")
             else:
-                print("     ⚠️  Exhaustivo omitido (n demasiado grande)")
+                print("      Exhaustivo omitido (n demasiado grande)")
             
             self.resultados.append(resultado)
     
@@ -127,9 +129,9 @@ class AnalizadorRendimiento:
         ax5 = plt.subplot(2, 3, 5)
         self._grafica_tiempo_acumulado(ax5)
         
-        # 6. Eficiencia (tiempo/n²)
+        # 6. Comparación Valor vs Bits
         ax6 = plt.subplot(2, 3, 6)
-        self._grafica_eficiencia(ax6)
+        self._grafica_valor_vs_bits(ax6)
         
         plt.tight_layout()
         
@@ -307,59 +309,121 @@ class AnalizadorRendimiento:
         ax.legend()
         ax.grid(True, alpha=0.3, axis='y')
     
-    def _grafica_eficiencia(self, ax):
-        """Gráfica de eficiencia (tiempo/n²)"""
-        algoritmos = {}
+   
+    def _grafica_valor_vs_bits(self, ax):
+        """Gráfica comparando complejidad por valor vs bits"""
+        n_values = []
+        ops_valor = []
+        ops_bits = []
+        tiempo_real = []
         
         for res in self.resultados:
             n = res['n']
-            for alg_nombre, alg_datos in res['algoritmos'].items():
-                if alg_nombre not in algoritmos:
-                    algoritmos[alg_nombre] = {'n': [], 'eficiencia': []}
-                
-                # Eficiencia = tiempo / n²
-                eficiencia = (alg_datos['tiempo'] * 1000) / (n * n)
-                algoritmos[alg_nombre]['n'].append(n)
-                algoritmos[alg_nombre]['eficiencia'].append(eficiencia)
+            bits = math.ceil(math.log2(n)) if n > 0 else 1
+            
+            n_values.append(n)
+            ops_valor.append(n * n)
+            ops_bits.append(2 ** (2 * bits))
+            
+            if 'Iterativo' in res['algoritmos']:
+                tiempo_real.append(res['algoritmos']['Iterativo']['tiempo'] * 1000)
         
-        colores = {
-            'Iterativo': '#2ecc71',
-            'Divide y Vencerás': '#3498db',
-            'Recursivo': '#e74c3c',
-            'Exhaustivo': '#9b59b6'
-        }
+        # Normalizar para comparación visual
+        max_ops = max(max(ops_valor), max(ops_bits))
+        ops_valor_norm = [o / max_ops * 100 for o in ops_valor]
+        ops_bits_norm = [o / max_ops * 100 for o in ops_bits]
         
-        for alg_nombre, datos in algoritmos.items():
-            ax.plot(
-                datos['n'], datos['eficiencia'],
-                marker='o', linewidth=2, markersize=8,
-                label=alg_nombre, color=colores.get(alg_nombre, 'gray')
-            )
+        x = np.arange(len(n_values))
+        width = 0.25
+        
+        ax.bar(x - width, ops_valor_norm, width, label='O(n²) - Por Valor', 
+              color='#2ecc71', alpha=0.8)
+        ax.bar(x, ops_bits_norm, width, label='O(2^(2b)) - Por Bits', 
+              color='#e74c3c', alpha=0.8)
+        
+        # Tiempo real como línea
+        ax2 = ax.twinx()
+        ax2.plot(x, tiempo_real, 'o-', color='#3498db', linewidth=2, 
+                markersize=6, label='Tiempo Real')
         
         ax.set_xlabel('Número de palabras (n)', fontsize=10)
-        ax.set_ylabel('Eficiencia (ms/n²)', fontsize=10)
-        ax.set_title('Eficiencia Algorítmica', fontsize=12, fontweight='bold')
-        ax.legend()
+        ax.set_ylabel('Operaciones Teóricas (% normalizado)', fontsize=10)
+        ax2.set_ylabel('Tiempo Real (ms)', fontsize=10, color='#3498db')
+        ax.set_title('Complejidad: Valor vs Bits vs Tiempo Real', 
+                    fontsize=12, fontweight='bold')
+        ax.set_xticks(x)
+        ax.set_xticklabels(n_values)
+        ax.legend(loc='upper left')
+        ax2.legend(loc='upper right')
         ax.grid(True, alpha=0.3)
-    
+
     def generar_tabla_comparativa(self):
         """Genera una tabla comparativa de resultados"""
+        print("\n" + "=" * 120)
+        print("TABLA COMPARATIVA DE RENDIMIENTO (Análisis Dual: Valor y Bits)")
+        print("=" * 120)
+        
+        print(f"\n{'n':<5} | {'bits':<6} | {'Algoritmo':<20} | {'Tiempo(ms)':<12} | "
+              f"{'Costo':<10} | {'Comp.Valor':<15} | {'Comp.Bits':<15}")
+        print("-" * 120)
+        
+        for res in self.resultados:
+            n = res['n']
+            bits = math.ceil(math.log2(n)) if n > 0 else 1
+            
+            for alg_nombre, alg_datos in sorted(res['algoritmos'].items()):
+                tiempo_ms = alg_datos['tiempo'] * 1000
+                costo = alg_datos['costo']
+                
+                # Determinar complejidades según algoritmo
+                if 'Iterativo' in alg_nombre or 'Divide' in alg_nombre:
+                    comp_valor = "O(n²)"
+                    comp_bits = "O(2^(2b))"
+                elif 'Recursivo' in alg_nombre:
+                    comp_valor = "O(2^n)"
+                    comp_bits = "O(2^(2^b))"
+                else:  # Exhaustivo
+                    comp_valor = "O(B(n))"
+                    comp_bits = "O(B(2^b))"
+                
+                print(f"{n:<5} | {bits:<6} | {alg_nombre:<20} | {tiempo_ms:>10.4f} | "
+                      f"{costo:>8.4f} | {comp_valor:<15} | {comp_bits:<15}")
+            
+            print("-" * 120)
+    
+    def analisis_complejidad_dual(self):
+        """Genera análisis comparando perspectiva de valor vs bits"""
+        
         print("\n" + "=" * 100)
-        print("TABLA COMPARATIVA DE RENDIMIENTO")
+        print("ANÁLISIS DE COMPLEJIDAD: PERSPECTIVA VALOR vs BITS")
         print("=" * 100)
         
-        print(f"\n{'n':<5} | {'Algoritmo':<20} | {'Tiempo (ms)':<15} | {'Costo':<15} | {'Memoria':<15}")
+        print("\nEste análisis muestra la diferencia entre medir complejidad por:")
+        print("  • VALOR: Número de elementos (n)")
+        print("  • BITS: Tamaño de representación binaria (b = log₂(n))")
+        print()
+        
+        print(f"{'n':<8} {'bits(b)':<10} {'O(n²)':<15} {'O(2^(2b))':<15} {'Ratio':<12} {'Tiempo(ms)':<12}")
         print("-" * 100)
         
         for res in self.resultados:
             n = res['n']
-            for alg_nombre, alg_datos in sorted(res['algoritmos'].items()):
-                tiempo_ms = alg_datos['tiempo'] * 1000
-                costo = alg_datos['costo']
-                memoria = "O(n)" if alg_nombre in ['Iterativo', 'Divide y Vencerás'] else "O(n) stack"
-                
-                print(f"{n:<5} | {alg_nombre:<20} | {tiempo_ms:>13.4f} | {costo:>13.4f} | {memoria:<15}")
-            print("-" * 100)
+            bits = math.ceil(math.log2(n)) if n > 0 else 1
+            
+            ops_valor = n * n
+            ops_bits = 2 ** (2 * bits)
+            ratio = ops_bits / ops_valor
+            
+            if 'Iterativo' in res['algoritmos']:
+                tiempo = res['algoritmos']['Iterativo']['tiempo'] * 1000
+                print(f"{n:<8} {bits:<10} {ops_valor:<15,} {ops_bits:<15,} {ratio:<12.2f} {tiempo:<12.4f}")
+        
+        print("\nINTERPRETACIÓN:")
+        print("-" * 100)
+        print("El Ratio muestra cuántas veces más operaciones se requieren al medir por bits.")
+        print("Aunque O(n²) parece polinomial, O(2^(2b)) es exponencial en el tamaño real.")
+        print("Esto clasifica al problema como PSEUDO-POLINOMIAL, no verdaderamente polinomial.")
+    
     
     def guardar_resultados_json(self, filename: str = 'resultados_benchmark.json'):
         """Guarda los resultados en formato JSON"""
@@ -373,7 +437,7 @@ class AnalizadorRendimiento:
         print("INFORME COMPLETO DE ANÁLISIS")
         print("=" * 100)
         
-        print("\n📊 COMPLEJIDAD TEÓRICA:")
+        print("\nCOMPLEJIDAD TEÓRICA:")
         print("-" * 100)
         print(f"{'Algoritmo':<25} | {'Tiempo':<15} | {'Espacio':<15} | {'Características'}")
         print("-" * 100)
@@ -382,7 +446,7 @@ class AnalizadorRendimiento:
         print(f"{'Divide y Vencerás':<25} | {'O(n²)':<15} | {'O(n²)':<15} | Con memoización")
         print(f"{'Exhaustivo':<25} | {'O(B(n))':<15} | {'O(n)':<15} | Bell number, muy lento")
         
-        print("\n📈 ANÁLISIS DE RESULTADOS EXPERIMENTALES:")
+        print("\nANÁLISIS DE RESULTADOS EXPERIMENTALES:")
         print("-" * 100)
         
         # Calcular promedios
@@ -416,7 +480,7 @@ class AnalizadorRendimiento:
 
 def main():
     """Función principal para ejecutar análisis completo"""
-    print("🚀 Iniciando análisis completo de rendimiento...")
+    print("Iniciando análisis completo de rendimiento...")
     
     analizador = AnalizadorRendimiento()
     
@@ -441,11 +505,11 @@ def main():
     analizador.guardar_resultados_json()
     
     # Generar gráficas
-    print("\n📊 Generando gráficas...")
+    print("\nGenerando gráficas...")
     analizador.generar_graficas(guardar=True, filename='analisis_division_parrafos.png')
     
     print("\n" + "=" * 100)
-    print("✅ ANÁLISIS COMPLETO FINALIZADO")
+    print("✅ANÁLISIS COMPLETO FINALIZADO")
     print("=" * 100)
     print("\nArchivos generados:")
     print("  - analisis_division_parrafos.png (gráficas)")

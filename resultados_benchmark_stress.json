@@ -3,11 +3,11 @@
     "n": 500,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 0.7309227999066934,
+        "tiempo": 0.41991779999807477,
         "costo": 0.0
       },
       "Divide y Vencerás": {
-        "tiempo": 0.6203647999791428,
+        "tiempo": 0.4298747000284493,
         "costo": 0.0
       }
     }
@@ -16,7 +16,7 @@
     "n": 1000,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 3.31053590006195,
+        "tiempo": 2.4344446000177413,
         "costo": 0.0
       }
     }
@@ -25,7 +25,7 @@
     "n": 1500,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 10.234072900027968,
+        "tiempo": 7.8127474000211805,
         "costo": 0.0
       }
     }
@@ -34,7 +34,7 @@
     "n": 2000,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 21.558512899908237,
+        "tiempo": 18.974202900077216,
         "costo": 0.0
       }
     }
@@ -43,7 +43,7 @@
     "n": 2500,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 40.342925400007516,
+        "tiempo": 31.83164690004196,
         "costo": 0.0
       }
     }
@@ -52,7 +52,7 @@
     "n": 3000,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 74.24264559999574,
+        "tiempo": 51.97767860000022,
         "costo": 0.0
       }
     }
@@ -61,7 +61,7 @@
     "n": 3500,
     "algoritmos": {
       "Iterativo": {
-        "tiempo": 107.81953280000016,
+        "tiempo": 81.68843929993454,
         "costo": 0.0
       }
     }

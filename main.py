@@ -40,7 +40,7 @@ class MenuPrincipal:
     
     def ejecutar_casos_prueba(self):
         """Ejecuta los casos de prueba predefinidos"""
-        print("\n🚀 Ejecutando casos de prueba...")
+        print("\nEjecutando casos de prueba...")
         print("-" * 80)
         
         from division_parrafos import ejecutar_comparacion
@@ -50,7 +50,7 @@ class MenuPrincipal:
     
     def ejecutar_analisis(self):
         """Ejecuta el análisis completo con gráficas"""
-        print("\n📊 Ejecutando análisis de rendimiento...")
+        print("\nEjecutando análisis de rendimiento...")
         print("-" * 80)
         
         from analisis_graficas import main as analisis_main
@@ -60,7 +60,7 @@ class MenuPrincipal:
     
     def ejecutar_tests(self):
         """Ejecuta los tests con pytest"""
-        print("\n🧪 Ejecutando tests con pytest...")
+        print("\nEjecutando tests con pytest...")
         print("-" * 80)
         
         resultado = subprocess.run(
@@ -83,14 +83,14 @@ class MenuPrincipal:
     
     def ejecutar_tests_cobertura(self):
         """Ejecuta tests con reporte de cobertura"""
-        print("\n🧪 Ejecutando tests con cobertura...")
+        print("\nEjecutando tests con cobertura...")
         print("-" * 80)
 
         try:
             import pytest
             import pytest_cov  # verificar que el plugin exista
         except ImportError:
-            print("\n⚠️  pytest-cov no está instalado.")
+            print("\npytest-cov no está instalado.")
             print("Instala con: pip install pytest pytest-cov")
             self.pausar()
             return
@@ -116,7 +116,7 @@ class MenuPrincipal:
     
     def ver_documentacion(self):
         """Muestra información del proyecto"""
-        print("\n📚 DOCUMENTACIÓN DEL PROYECTO")
+        print("\nDOCUMENTACIÓN DEL PROYECTO")
         print("=" * 80)
         
         print("""
@@ -126,7 +126,7 @@ Este proyecto implementa 4 algoritmos para el problema de División en Párrafos
    ✅ Más eficiente, recomendado para producción
    
 2. RECURSIVO PURO - O(2ⁿ)
-   ⚠️  Exponencial, solo para demostración (n ≤ 10)
+    Exponencial, solo para demostración (n ≤ 10)
    
 3. DIVIDE Y VENCERÁS - O(n²)
    ✅ Alternativa válida con memoización
@@ -153,18 +153,18 @@ Para más información, consulta README.md
     
     def ejecutar_todo(self):
         """Ejecuta todas las funcionalidades"""
-        print("\n🚀 EJECUCIÓN COMPLETA DEL PROYECTO")
+        print("\nEJECUCIÓN COMPLETA DEL PROYECTO")
         print("=" * 80)
         
-        print("\n1️⃣  CASOS DE PRUEBA")
+        print("\n1️  CASOS DE PRUEBA")
         print("-" * 80)
         self.ejecutar_casos_prueba()
         
-        print("\n\n2️⃣  ANÁLISIS Y GRÁFICAS")
+        print("\n\n2️  ANÁLISIS Y GRÁFICAS")
         print("-" * 80)
         self.ejecutar_analisis()
         
-        print("\n\n3️⃣  TESTS UNITARIOS")
+        print("\n\n3️  TESTS UNITARIOS")
         print("-" * 80)
         self.ejecutar_tests()
         
@@ -176,7 +176,7 @@ Para más información, consulta README.md
     
     def ejemplo_personalizado(self):
         """Permite al usuario ingresar sus propias palabras en lugar de longitudes"""
-        print("\n✏️  EJEMPLO PERSONALIZADO")
+        print("\n EJEMPLO PERSONALIZADO")
         print("-" * 80)
     
         try:
@@ -203,7 +203,7 @@ Para más información, consulta README.md
             L = int(input("Longitud de línea (L): "))
             b = float(input("Amplitud ideal de espacios (b): "))
         
-            print("\n🔍 Resolviendo con tus parámetros...")
+            print("\n Resolviendo con tus parámetros...")
             print(f"L = {L}, b = {b}")
         
             from division_parrafos import DivisionParrafos, mostrar_solucion
@@ -221,7 +221,7 @@ Para más información, consulta README.md
             print(f"Tiempo: {tiempo*1000:.4f} ms")
         
             # ----- Mostrar el texto formateado por líneas (con palabras reales) -----
-            print("\n📄 Párrafos formateados (con tus palabras):")
+            print("\nPárrafos formateados (con tus palabras):")
             print("-" * 80)
         
             lineas_info = []
@@ -264,7 +264,7 @@ Para más información, consulta README.md
             print("-" * 80)
         
             # ----- Detalle por línea según los parámetros del modelo -----
-            print("\n📐 Detalle por línea (según L y b):")
+            print("\nDetalle por línea (según L y b):")
             print("-" * 80)
             for info in lineas_info:
                 print(f"Línea {info['linea']}:")
@@ -286,7 +286,7 @@ Para más información, consulta README.md
                 print("-" * 80)
         
             # ----- Representación interna original (opcional) -----
-            print("\n📏 Representación interna (longitudes):")
+            print("\nRepresentación interna (longitudes):")
             mostrar_solucion(palabras_longitudes, cortes, L, b)
         
         except ValueError:
@@ -301,7 +301,7 @@ Para más información, consulta README.md
         Ejecuta ejemplos con entradas muy grandes para testear el comportamiento
         de las implementaciones (stress test) y genera gráficas de n vs tiempo.
         """
-        print("\n🚀 STRESS TEST CON ENTRADAS GRANDES")
+        print("\nSTRESS TEST CON ENTRADAS GRANDES")
         print("=" * 80)
 
         from division_parrafos import DivisionParrafos, ejecutar_y_medir
@@ -316,7 +316,7 @@ Para más información, consulta README.md
         resultados_stress = []
 
         for n in tamanos:
-            print(f"\n📦 Instancia con n = {n} palabras")
+            print(f"\nInstancia con n = {n} palabras")
             print("-" * 80)
             # Longitudes aleatorias de palabras entre 2 y 10 caracteres
             palabras = [random.randint(2, 10) for _ in range(n)]
@@ -372,7 +372,7 @@ Para más información, consulta README.md
                         'costo': res_exh['costo']
                     }
 
-            print("\n📊 Resumen de resultados (n = {}):".format(n))
+            print("\nResumen de resultados (n = {}):".format(n))
             print("-" * 80)
             for res in resultados_alg:
                 if res["exito"]:
@@ -387,7 +387,7 @@ Para más información, consulta README.md
 
             resultados_stress.append(resultado_n)
 
-        print("\n✅ Stress test finalizado.")
+        print("\nStress test finalizado.")
 
         # ----- Generar gráficas y tabla para estos resultados grandes -----
         print("\n📊 Generando análisis y gráficas del stress test (n grandes)...")
@@ -408,7 +408,7 @@ Para más información, consulta README.md
     
     def pausar(self):
         """Pausa la ejecución esperando input del usuario"""
-        input("\n📌 Presiona ENTER para continuar...")
+        input("\nPresiona ENTER para continuar...")
     
     def ejecutar(self):
         """Ejecuta el menú principal"""
@@ -418,7 +418,7 @@ Para más información, consulta README.md
             opcion = input("\nOpción: ").strip()
             
             if opcion == '0':
-                print("\n👋 ¡Hasta luego!")
+                print("\n¡Hasta luego!")
                 sys.exit(0)
             
             if opcion in self.opciones:
@@ -427,7 +427,7 @@ Para más información, consulta README.md
                     try:
                         funcion()
                     except KeyboardInterrupt:
-                        print("\n\n⚠️  Operación cancelada por el usuario")
+                        print("\n\nOperación cancelada por el usuario")
                         self.pausar()
                     except Exception as e:
                         print(f"\n❌ Error: {e}")
@@ -457,7 +457,7 @@ def verificar_dependencias():
             faltantes.append(nombre_pip)
     
     if faltantes:
-        print("\n⚠️  ADVERTENCIA: Faltan dependencias")
+        print("\nADVERTENCIA: Faltan dependencias")
         print("-" * 80)
         print("\nInstala las dependencias faltantes con:")
         print(f"pip install {' '.join(faltantes)}")
@@ -481,7 +481,7 @@ def main():
     try:
         menu.ejecutar()
     except KeyboardInterrupt:
-        print("\n\n👋 Programa interrumpido. ¡Hasta luego!")
+        print("\n\nPrograma interrumpido. ¡Hasta luego!")
         sys.exit(0)
 
 

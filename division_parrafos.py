@@ -2,6 +2,7 @@
 Proyecto: División en Párrafos
 Análisis y Diseño de Algoritmos
 Implementaciones: Iterativa, Recursiva, Divide y Vencerás, Exhaustiva
+Autores: Cristian Camilo González Villa , José David López Ostos
 """
 
 import time
@@ -73,9 +74,20 @@ class DivisionParrafos:
     def resolver_iterativo(self) -> Tuple[float, List[int]]:
         """
         Algoritmo iterativo usando programación dinámica bottom-up.
-        
+    
+        Complejidad Temporal:
+        - Por número de palabras (n): O(n²)
+        - Por tamaño en bits (b = log₂(n)): O(2^(2b))
+        - Clasificación: Pseudo-polinomial
+    
+        Complejidad Espacial: O(n)
+    
+        Peor Caso: 
+        Entrada con múltiples configuraciones válidas donde todas 
+        las combinaciones de agrupamiento deben ser evaluadas.
+    
         Returns:
-            (costo_minimo, puntos_de_corte)
+        (costo_minimo, puntos_de_corte)
         """
         n = self.k
         # dp[i] = costo mínimo para las primeras i palabras
@@ -110,11 +122,22 @@ class DivisionParrafos:
     # ===================== ALGORITMO RECURSIVO PURO =====================
     def resolver_recursivo(self) -> Tuple[float, List[int]]:
         """
-        Algoritmo recursivo puro sin memorización.
-        ADVERTENCIA: Muy lento para entradas grandes.
-        
-        Returns:
-            (costo_minimo, puntos_de_corte)
+    Algoritmo recursivo puro sin memorización.
+    ADVERTENCIA: Muy lento para entradas grandes.
+    
+    Complejidad Temporal:
+        - Por número de palabras (n): O(2^n)
+        - Por tamaño en bits (b = log₂(n)): O(2^(2^b))
+        - Clasificación: Exponencial
+    
+    Complejidad Espacial: O(n) - pila de recursión
+    
+    Peor Caso:
+        Cualquier entrada con n > 15, donde el árbol de recursión
+        crece exponencialmente sin reutilizar cálculos.
+    
+    Returns:
+        (costo_minimo, puntos_de_corte)
         """
         def recursivo_aux(pos: int) -> Tuple[float, List[int]]:
             """
@@ -150,11 +173,22 @@ class DivisionParrafos:
     # ===================== ALGORITMO DIVIDE Y VENCERÁS =====================
     def resolver_divide_venceras(self) -> Tuple[float, List[int]]:
         """
-        Algoritmo usando técnica de divide y vencerás con memorización.
-        
-        Returns:
-            (costo_minimo, puntos_de_corte)
-        """
+    Algoritmo usando técnica de divide y vencerás con memorización.
+    
+    Complejidad Temporal:
+        - Por número de palabras (n): O(n²)
+        - Por tamaño en bits (b = log₂(n)): O(2^(2b))
+        - Clasificación: Pseudo-polinomial
+    
+    Complejidad Espacial: O(n²) - diccionario de memorización
+    
+    Peor Caso:
+        Similar al iterativo, pero con overhead de recursión y
+        manejo del diccionario de memorización.
+    
+    Returns:
+        (costo_minimo, puntos_de_corte)
+    """
         memo: Dict[Tuple[int, int], Tuple[float, List[int]]] = {}
         
         def divide_aux(inicio: int, fin: int) -> Tuple[float, List[int]]:
@@ -193,12 +227,22 @@ class DivisionParrafos:
     # ===================== ALGORITMO EXHAUSTIVO =====================
     def resolver_exhaustivo(self) -> Tuple[float, List[int]]:
         """
-        Algoritmo exhaustivo que prueba todas las combinaciones posibles.
-        ADVERTENCIA: Extremadamente lento, solo para n muy pequeño.
-        
-        Returns:
-            (costo_minimo, puntos_de_corte)
-        """
+    Algoritmo exhaustivo que prueba todas las combinaciones posibles.
+    ADVERTENCIA: Extremadamente lento, solo para n muy pequeño.
+    
+    Complejidad Temporal:
+        - Por número de palabras (n): O(B(n)) donde B(n) es el Número de Bell
+        - Por tamaño en bits (b = log₂(n)): O(B(2^b))
+        - Clasificación: Súper-exponencial
+    
+    Complejidad Espacial: O(n)
+    
+    Peor Caso:
+        Cualquier entrada con n ≥ 6. B(6)=203, B(10)=115,975
+    
+    Returns:
+        (costo_minimo, puntos_de_corte)
+    """
         def generar_particiones(n: int) -> List[List[int]]:
             """Genera todas las particiones posibles de n elementos"""
             if n == 0:
@@ -252,7 +296,7 @@ def ejecutar_y_medir(algoritmo_func, nombre: str, umbral_lento: float = TIEMPO_U
     Returns:
         Diccionario con resultados y métricas
     """
-    print(f"\n▶ Ejecutando {nombre}...")
+    print(f"\nEjecutando {nombre}...")
     inicio = time.perf_counter()
     try:
         costo, cortes = algoritmo_func()
@@ -261,7 +305,7 @@ def ejecutar_y_medir(algoritmo_func, nombre: str, umbral_lento: float = TIEMPO_U
         # Advertencia si se demoró "mucho"
         if tiempo > umbral_lento:
             print(
-                f"⚠️ Aviso: {nombre} está tardando más de lo normal "
+                f"Aviso: {nombre} está tardando más de lo normal "
                 f"({tiempo:.3f} s). Esto es esperable para algoritmos de "
                 f"alta complejidad (por ejemplo, recursivo puro o exhaustivo)."
             )
@@ -321,7 +365,7 @@ def ejecutar_comparacion():
     print("=" * 70)
     
     # Ejemplo 1: Pequeño (para probar todos los algoritmos)
-    print("\n\n📝 CASO DE PRUEBA 1: Entrada pequeña")
+    print("\n\nCASO DE PRUEBA 1: Entrada pequeña")
     print("-" * 70)
     palabras1 = [5, 3, 4, 6, 2]
     L1 = 15
@@ -339,7 +383,7 @@ def ejecutar_comparacion():
     resultados1.append(ejecutar_y_medir(dp1.resolver_divide_venceras, "Divide y Vencerás"))
     resultados1.append(ejecutar_y_medir(dp1.resolver_exhaustivo, "Exhaustivo"))
     
-    print("\n📊 RESULTADOS:")
+    print("\nRESULTADOS:")
     print("-" * 70)
     for res in resultados1:
         if res['exito']:
@@ -356,7 +400,7 @@ def ejecutar_comparacion():
     mostrar_solucion(palabras1, sol_optima1['cortes'], L1, b1)
     
     # Ejemplo 2: Mediano (también ejecuta todos los algoritmos)
-    print("\n\n📝 CASO DE PRUEBA 2: Entrada mediana")
+    print("\n\nCASO DE PRUEBA 2: Entrada mediana")
     print("-" * 70)
     palabras2 = [3, 4, 2, 5, 3, 4, 6, 2, 3, 5]
     L2 = 20
@@ -374,7 +418,7 @@ def ejecutar_comparacion():
     resultados2.append(ejecutar_y_medir(dp2.resolver_divide_venceras, "Divide y Vencerás"))
     resultados2.append(ejecutar_y_medir(dp2.resolver_exhaustivo, "Exhaustivo"))
     
-    print("\n📊 RESULTADOS:")
+    print("\nRESULTADOS:")
     print("-" * 70)
     for res in resultados2:
         if res['exito']:
@@ -390,15 +434,27 @@ def ejecutar_comparacion():
     mostrar_solucion(palabras2, sol_optima2['cortes'], L2, b2)
     
     # Resumen de complejidades
-    print("\n\n📚 ANÁLISIS DE COMPLEJIDAD TEMPORAL")
-    print("=" * 70)
-    print(f"{'Algoritmo':<25} | {'Complejidad':<20} | {'Descripción'}")
-    print("-" * 70)
-    print(f"{'Iterativo (DP)':<25} | {'O(n²)':<20} | Programación dinámica bottom-up")
-    print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | Sin memorización, exponencial")
-    print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | Con memorización (memoization)")
-    print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | Números de Bell, extremadamente lento")
+    # print("\n\n📚 ANÁLISIS DE COMPLEJIDAD TEMPORAL")
+    # print("=" * 70)
+    # print(f"{'Algoritmo':<25} | {'Complejidad':<20} | {'Descripción'}")
+    # print("-" * 70)
+    # print(f"{'Iterativo (DP)':<25} | {'O(n²)':<20} | Programación dinámica bottom-up")
+    # print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | Sin memorización, exponencial")
+    # print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | Con memorización (memoization)")
+    # print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | Números de Bell, extremadamente lento")
     
+    print("\n\nANÁLISIS DE COMPLEJIDAD TEMPORAL")
+    print("=" * 100)
+    print(f"{'Algoritmo':<25} | {'Por Valor (n)':<20} | {'Por Bits (b=log₂n)':<25} | {'Descripción'}")
+    print("-" * 100)
+    print(f"{'Iterativo (DP)':<25} | {'O(n²)':<20} | {'O(2^(2b))':<25} | Pseudo-polinomial")
+    print(f"{'Recursivo Puro':<25} | {'O(2ⁿ)':<20} | {'O(2^(2^b))':<25} | Exponencial sin memo")
+    print(f"{'Divide y Vencerás':<25} | {'O(n²)':<20} | {'O(2^(2b))':<25} | Pseudo-polinomial")
+    print(f"{'Exhaustivo':<25} | {'O(B(n))':<20} | {'O(B(2^b))':<25} | Súper-exponencial")
+    print("\nNota: La medición por bits revela que los algoritmos O(n²) son exponenciales")
+    print("      respecto al tamaño verdadero de la entrada, clasificándolos como")
+    print("      cuasi-polinomiales en lugar de verdaderamente polinomiales.")
+
     print("\n\n✅ CONCLUSIÓN:")
     print("-" * 70)
     print("El algoritmo ITERATIVO (Programación Dinámica) es el más eficiente")
