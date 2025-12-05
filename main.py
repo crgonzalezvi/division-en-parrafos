@@ -4,9 +4,13 @@ Ejecuta todas las funcionalidades del proyecto en un solo comando
 """
 
 import sys
+#Controla la salida del programa y obtiene rutas del intérprete Python
 import os
+#Permite ejecutar comandos del sistema operativo
 import subprocess
+#Ejecuta comandos externos como pytest
 from typing import Optional
+#Define tipos de datos opcionales para mejor documentación
 import time
 
 class MenuPrincipal:
@@ -44,6 +48,7 @@ class MenuPrincipal:
         print("-" * 80)
         
         from division_parrafos import ejecutar_comparacion
+        #Núcleo del proyecto - Implementa los 4 algoritmos
         ejecutar_comparacion()
         
         self.pausar()
@@ -237,7 +242,7 @@ Para más información, consulta README.md
                     return
                 
                 palabras = [int(x) for x in palabras_str.split()]
-                print(f"\n📏 Longitudes: {palabras}")
+                print(f"\nLongitudes: {palabras}")
             
                 # Calcular sugerencia
                 max_longitud = max(palabras)
@@ -342,27 +347,36 @@ Para más información, consulta README.md
         from division_parrafos import DivisionParrafos
         dp = DivisionParrafos(longitudes, L, b)
         
-        # Mostrar solución
+        # Reconstruir todas las líneas para análisis
+        lineas = []
         if not cortes:
-            print(" ".join(palabras_texto))
+            lineas.append(palabras_texto)
         else:
             inicio = 0
             for corte in cortes:
                 fin = corte + 1
-                if inicio >= fin:
-                    continue
-                linea = palabras_texto[inicio:fin]
-                print(" ".join(linea))
-                inicio = fin
+                if inicio < fin:
+                    lineas.append(palabras_texto[inicio:fin])
+                    inicio = fin
             
             if inicio < len(palabras_texto):
-                linea = palabras_texto[inicio:]
-                print(" ".join(linea))
+                lineas.append(palabras_texto[inicio:])
+        
+        # Mostrar solución formateada
+        for i, linea in enumerate(lineas, 1):
+            linea_str = " ".join(linea)
+            # Mostrar línea con número
+            print(f"Línea {i:2}: {linea_str}")
         
         print("=" * 80)
         
-        # Detalle por línea
-        print("\nDETALLE POR LÍNEA:")
+        # Análisis de la solución
+        print("\nANÁLISIS DE LA SOLUCIÓN:")
+        print("-" * 80)
+        
+        # Usar variable para b' para evitar problema de backslash
+        b_prime_header = "b'"
+        print(f"{'Línea':<6} {'Palabras':<25} {'Uso':<10} {b_prime_header:<8} {'Costo':<10} {'Decisión'}")
         print("-" * 80)
         
         inicio = 0
@@ -381,7 +395,7 @@ Para más información, consulta README.md
             if inicio >= fin:
                 continue
                 
-            # Calcular costo REAL usando la misma función
+            # Calcular costo REAL
             costo_linea = dp.calcular_costo_linea(inicio, fin - 1)
             
             linea_palabras = palabras_texto[inicio:fin]
@@ -391,22 +405,31 @@ Para más información, consulta README.md
             num_palabras = len(linea_longitudes)
             num_espacios = num_palabras - 1
             espacio_total = suma + num_espacios
-            
-            print(f"\nLínea {linea_num}:")
-            print(f"  Palabras           : {' '.join(linea_palabras)}")
-            print(f"  Índices (1-based)  : {inicio+1} a {fin}")
-            print(f"  Número de palabras : {num_palabras}")
-            print(f"  Longitud palabras  : {suma} caracteres")
-            print(f"  Espacios necesarios: {espacio_total}/{L}")
+            uso_porcentaje = (espacio_total / L) * 100 if L > 0 else 0
             
             if num_espacios > 0:
                 b_prima = (L - suma) / num_espacios
-                print(f"  b' calculado       : {b_prima:.4f}")
-            
-            if fin == len(palabras_texto):
-                print(f"  Costo de la línea  : {costo_linea:.4f} (última línea)")
+                b_prima_str = f"{b_prima:.2f}"
             else:
-                print(f"  Costo de la línea  : {costo_linea:.4f}")
+                b_prima_str = "N/A"
+            
+            # Determinar tipo de decisión
+            if num_palabras == 1:
+                decision = "Palabra sola"
+            elif fin == len(palabras_texto):
+                decision = "Última línea"
+            elif abs(b_prima - b) < 0.1:
+                decision = "Agrupamiento perfecto"
+            elif abs(b_prima - b) < 2.0:
+                decision = "Agrupamiento aceptable"
+            else:
+                decision = "Agrupamiento costoso"
+            
+            # Formatear uso
+            uso_str = f"{espacio_total:2d}/{L} ({uso_porcentaje:3.0f}%)"
+            
+            print(f"{linea_num:<6} {' '.join(linea_palabras):<25} "
+                f"{uso_str:<10} {b_prima_str:<8} {costo_linea:<10.4f} {decision}")
             
             if costo_linea != float('inf'):
                 costo_total_calculado += costo_linea
@@ -414,20 +437,56 @@ Para más información, consulta README.md
             inicio = fin
             linea_num += 1
         
-        print("\n" + "-" * 80)
-        print(f"COSTO TOTAL CALCULADO: {costo_total_calculado:.4f}")
-        print(f"COSTO ÓPTIMO REPORTADO: {dp.resolver_iterativo()[0]:.4f}")
+        print("-" * 80)
+        costo_optimo = dp.resolver_iterativo()[0]
+        print(f"RESUMEN:")
+        print(f"   • Total de líneas: {len(lineas)}")
+        print(f"   • Costo total calculado: {costo_total_calculado:.4f}")
+        print(f"   • Costo óptimo reportado: {costo_optimo:.4f}")
+        print(f"   • Eficiencia promedio: {sum(longitudes) / (len(lineas) * L) * 100:.1f}%")
+        
+        if abs(costo_total_calculado - costo_optimo) > 0.001:
+            print("   ADVERTENCIA: Los costos no coinciden. Puede haber error en la reconstrucción.")
+        
         print("-" * 80)
         
-        # Verificar consistencia
-        if abs(costo_total_calculado - dp.resolver_iterativo()[0]) > 0.001:
-            print("ADVERTENCIA: Los costos no coinciden. Puede haber error en la reconstrucción.")
+        # Explicación de decisiones clave
+        print("\nEXPLICACIÓN DE DECISIONES:")
+        print("-" * 80)
+        
+        # Analizar decisiones interesantes
+        inicio = 0
+        for i, fin in enumerate(fines_linea):
+            if inicio >= fin:
+                continue
+                
+            linea_palabras = palabras_texto[inicio:fin]
+            linea_longitudes = longitudes[inicio:fin]
+            num_palabras = len(linea_palabras)
+            
+            if num_palabras > 1:
+                suma = sum(linea_longitudes)
+                num_espacios = num_palabras - 1
+                b_prima = (L - suma) / num_espacios
+                
+                if abs(b_prima - b) > 2.0:
+                    print(f"• {' '.join(linea_palabras)}: b'={b_prima:.2f} (muy diferente de b={b})")
+                    print(f"  → Espacios desiguales hacen costoso agrupar")
+                elif fin == len(palabras_texto):
+                    print(f"• {' '.join(linea_palabras)}: Última línea con costo reducido")
+                    print(f"  → El algoritmo permite más flexibilidad al final")
+                elif abs(b_prima - b) < 0.1:
+                    print(f"• {' '.join(linea_palabras)}: Agrupamiento perfecto (b'={b_prima:.2f})")
+                    print(f"  → Espacios ideales, costo mínimo")
+            
+            inicio = fin
         
         # Representación interna
-        print("\n🔢 REPRESENTACIÓN INTERNA (solo longitudes):")
+        print("\nREPRESENTACIÓN INTERNA (solo longitudes):")
+        print("=" * 60)
+        
         from division_parrafos import mostrar_solucion
         mostrar_solucion(longitudes, cortes, L, b)
-
 
     def _mostrar_solucion_solo_longitudes(self, longitudes, cortes, L, b):
         """Muestra la solución cuando el usuario ingresó solo longitudes"""
@@ -532,7 +591,7 @@ Para más información, consulta README.md
         print("\nStress test finalizado.")
 
         # ----- Generar gráficas y tabla para estos resultados grandes -----
-        print("\n📊 Generando análisis y gráficas del stress test (n grandes)...")
+        print("\nGenerando análisis y gráficas del stress test (n grandes)...")
         analizador = AnalizadorRendimiento()
         analizador.resultados = resultados_stress
 

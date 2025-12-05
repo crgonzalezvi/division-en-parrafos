@@ -3,7 +3,7 @@
 
 ---
 
-## 📋 Descripción del Proyecto
+## Descripción del Proyecto
 
 Este proyecto implementa y compara **cuatro algoritmos diferentes** para resolver el problema de División en Párrafos:
 
@@ -23,7 +23,7 @@ Dada una secuencia de palabras con longitudes `l₁, l₂, ..., lₖ`, se desea 
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 proyecto-division-parrafos/
@@ -41,7 +41,7 @@ proyecto-division-parrafos/
 
 ---
 
-## 🛠️ Instalación
+## Instalación
 
 ### Prerrequisitos
 
@@ -83,7 +83,7 @@ numpy>=1.21.0
 
 ---
 
-## 🚀 Uso del Proyecto
+## Uso del Proyecto
 
 ### 1. Ejecutar el programa principal
 
@@ -122,14 +122,14 @@ python analisis_graficas.py
 ```
 
 **Esto generará:**
-- ✅ 6 gráficas comparativas en un solo archivo PNG
-- ✅ Tabla comparativa de rendimiento
-- ✅ Informe completo con conclusiones
-- ✅ Archivo JSON con todos los datos
+- 6 gráficas comparativas en un solo archivo PNG
+- Tabla comparativa de rendimiento
+- Informe completo con conclusiones
+- Archivo JSON con todos los datos
 
 ---
 
-## 📊 Gráficas Generadas
+## Gráficas Generadas
 
 El módulo `analisis_graficas.py` genera 6 gráficas:
 
@@ -142,7 +142,7 @@ El módulo `analisis_graficas.py` genera 6 gráficas:
 
 ---
 
-## 🧪 Casos de Prueba
+## Casos de Prueba
 
 ### Caso Pequeño (todos los algoritmos)
 ```python
@@ -158,40 +158,21 @@ L = 20
 b = 2.0
 ```
 
-### Personalizar casos
 
-```python
-from division_parrafos import DivisionParrafos
-
-# Crear instancia con tus datos
-dp = DivisionParrafos(
-    palabras=[5, 3, 4, 6, 2, 3],
-    L=20,
-    b=1.5
-)
-
-# Resolver con el algoritmo que prefieras
-costo, cortes = dp.resolver_iterativo()
-print(f"Costo óptimo: {costo}")
-print(f"Puntos de corte: {cortes}")
-```
-
----
-
-## 📈 Complejidad de los Algoritmos
+## Complejidad de los Algoritmos
 
 | Algoritmo | Complejidad Temporal | Complejidad Espacial | Uso Recomendado |
 |-----------|---------------------|---------------------|-----------------|
-| **Iterativo (DP)** | O(n²) | O(n) | ✅ **PRODUCCIÓN** |
-| **Recursivo Puro** | O(2ⁿ) | O(n) stack | ⚠️ Solo demostración (n ≤ 10) |
-| **Divide y Vencerás** | O(n²) | O(n²) | ✅ Alternativa válida |
-| **Exhaustivo** | O(B(n))* | O(n) | ❌ Solo n ≤ 5 |
+| **Iterativo (DP)** | O(n²) | O(n) |  **PRODUCCIÓN** |
+| **Recursivo Puro** | O(2ⁿ) | O(n) stack |  Solo demostración (n ≤ 10) |
+| **Divide y Vencerás** | O(n²) | O(n²) |  Alternativa válida |
+| **Exhaustivo** | O(B(n))* | O(n) |  Solo n ≤ 5 |
 
 *B(n) = Número de Bell (particiones de conjunto)
 
 ---
 
-## 🧩 Estructura del Código
+## Estructura del Código
 
 ### `division_parrafos.py`
 
@@ -221,7 +202,7 @@ def ejecutar_comparacion()  # Función principal
 
 ---
 
-## 🧪 Suite de Pruebas (pytest)
+## Suite de Pruebas (pytest)
 
 ### Categorías de Tests
 
@@ -249,91 +230,28 @@ pytest test_division_parrafos.py -k "costo" -v
 
 ---
 
-## 📊 Resultados Esperados
+## Resultados Esperados
 
 ### Tiempo de Ejecución (aproximado)
 
 Para `n = 20` palabras:
-- **Iterativo:** ~0.5 ms ✅
-- **Divide y Vencerás:** ~1.5 ms ✅
-- **Recursivo:** ~30,000 ms ⚠️
-- **Exhaustivo:** No termina ❌
+- **Iterativo:** Aprox 0.5 ms 
+- **Divide y Vencerás:** Aprox 1.5 ms 
+- **Recursivo:** Aprox 30,000 ms 
+- **Exhaustivo:** No termina 
 
 ### Conclusiones del Análisis
 
-1. ✅ **Iterativo es el ganador** - Más rápido y eficiente
-2. ⚠️ **Recursivo puro es impracticable** para n > 10
-3. ⚠️ **Exhaustivo solo sirve para demostración** (n ≤ 5)
-4. ✅ **Divide y Vencerás es competitivo** pero con más overhead
-5. 🎯 **Todos encuentran el mismo costo óptimo** (validación correcta)
+1. **Iterativo es el ganador** - Más rápido y eficiente
+2. **Recursivo puro es impracticable** para n > 10
+3. **Exhaustivo solo sirve para demostración** (n ≤ 5)
+4. **Divide y Vencerás es competitivo** pero con más overhead
+5. **Todos encuentran el mismo costo óptimo** (validación correcta)
 
 ---
 
-## 🎨 Personalización
 
-### Cambiar parámetros de benchmark
-
-Edita `analisis_graficas.py`:
-
-```python
-def main():
-    analizador = AnalizadorRendimiento()
-    
-    # Personaliza estos valores
-    tamaños = [3, 5, 8, 10, 15, 20, 30, 40, 50]  # Agregar más tamaños
-    L = 25  # Cambiar longitud de línea
-    b = 1.5  # Cambiar amplitud ideal
-    
-    analizador.ejecutar_benchmark(tamaños, L=L, b=b)
-    # ...
-```
-
-### Agregar nuevos tests
-
-En `test_division_parrafos.py`:
-
-```python
-def test_mi_caso_especial():
-    """Descripción del test"""
-    dp = DivisionParrafos([...], L=..., b=...)
-    costo, cortes = dp.resolver_iterativo()
-    assert costo < float('inf')
-    # ... más aserciones
-```
-
----
-
-## 🐛 Solución de Problemas
-
-### Error: ModuleNotFoundError
-
-```bash
-# Asegúrate de tener instaladas las dependencias
-pip install -r requirements.txt
-```
-
-### Error: "No module named 'division_parrafos'"
-
-```bash
-# Asegúrate de estar en el directorio correcto
-cd proyecto-division-parrafos
-
-# O agrega el path manualmente
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"  # Linux/Mac
-set PYTHONPATH=%PYTHONPATH%;%cd%  # Windows
-```
-
-### Gráficas no se muestran
-
-```python
-# Si usas SSH o entorno sin GUI, guarda sin mostrar:
-plt.savefig('grafica.png')
-# Comenta: plt.show()
-```
-
----
-
-## 📚 Referencias
+## Referencias
 
 - **Programación Dinámica:** Cormen, T. H., et al. "Introduction to Algorithms"
 - **Divide y Vencerás:** Problema de líneas óptimas (Knuth-Plass)
@@ -341,42 +259,10 @@ plt.savefig('grafica.png')
 
 ---
 
-## 👨‍💻 Autor
+## Autores
 
 Proyecto desarrollado para el curso de Análisis y Diseño de Algoritmos
+- Cristian Camilo González Villa
+- José David López Ostos
 
 ---
-
-## 📝 Licencia
-
-Este proyecto es de uso académico.
-
----
-
-## 🎯 Checklist del Proyecto
-
-- [x] ✅ Algoritmo Iterativo (Programación Dinámica)
-- [x] ✅ Algoritmo Recursivo Puro
-- [x] ✅ Algoritmo Divide y Vencerás
-- [x] ✅ Algoritmo Exhaustivo
-- [x] ✅ Mediciones de tiempo
-- [x] ✅ Comparación de rendimiento
-- [x] ✅ Gráficas de análisis
-- [x] ✅ Suite de tests con pytest
-- [x] ✅ Documentación completa
-- [x] ✅ Casos de prueba variados
-- [x] ✅ Análisis de complejidad
-
----
-
-## 🚀 Próximos Pasos (Opcional)
-
-1. Implementar visualización interactiva con tkinter
-2. Agregar soporte para diferentes métricas de costo
-3. Exportar resultados a PDF
-4. Crear API REST para el servicio
-5. Implementar paralelización para entradas muy grandes
-
----
-
-**¡Proyecto completo y listo para entregar! 🎉**

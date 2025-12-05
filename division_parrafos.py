@@ -6,11 +6,15 @@ Autores: Cristian Camilo González Villa , José David López Ostos
 """
 
 import time
+#Para medición de tiempo de ejecución
 from typing import List, Tuple, Dict
+#Facilitar la manipulación de argumentos y salida del sistema
 import sys
+#Inreaccion con el SO
+
 
 TIEMPO_UMBRAL_LENTO = 30.0  # segundos
-
+# Tiempo "limite" para considerar un algoritmo como lento
 
 class DivisionParrafos:
     """Clase principal para resolver el problema de División en Párrafos"""
@@ -34,13 +38,20 @@ class DivisionParrafos:
         Versión corregida con cálculo consistente.
         """
         # Sumar longitudes de palabras de i a j
+
+        #"casa" "perro" "gato"
         suma_longitudes = sum(self.palabras[i:j+1])
+        # 4 + 5 +4 = 13 caracteres
         num_palabras = j - i + 1
+        # 3
         num_espacios = num_palabras - 1
+        # 3 - 1 = 2 espacios entre palabras
     
         # Verificar si cabe en la línea
         espacio_necesario = suma_longitudes + num_espacios
+        # 13 + 2 = 15 caracteres en total
         if espacio_necesario > self.L:
+            #Si no cabe, costo infinito
             return float('inf')
     
         # Si es la última línea
@@ -60,9 +71,11 @@ class DivisionParrafos:
             # Múltiples palabras
             espacio_sobrante = self.L - espacio_necesario
             b_prima = 1.0 + (espacio_sobrante / num_espacios)
+            # Espacio real entre palabras (valor que refleja que tan diferente es del ideal)
         
             # Costo principal: desviación del espacio ideal
             costo_espacios = num_espacios * ((b_prima - self.b) ** 2)
+
         
             # Costo adicional: espacio sobrante no utilizado
             costo_sobrante = (espacio_sobrante / self.L) ** 2
