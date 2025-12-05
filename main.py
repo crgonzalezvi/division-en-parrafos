@@ -39,7 +39,7 @@ class MenuPrincipal:
     
     def ejecutar_casos_prueba(self):
         """Ejecuta los casos de prueba predefinidos"""
-        print("\n🚀 Ejecutando casos de prueba...")
+        print("\nEjecutando casos de prueba...")
         print("-" * 80)
         
         from division_parrafos import ejecutar_comparacion
@@ -49,7 +49,7 @@ class MenuPrincipal:
     
     def ejecutar_analisis(self):
         """Ejecuta el análisis completo con gráficas"""
-        print("\n📊 Ejecutando análisis de rendimiento...")
+        print("\nEjecutando análisis de rendimiento...")
         print("-" * 80)
         
         from analisis_graficas import main as analisis_main
@@ -59,7 +59,7 @@ class MenuPrincipal:
     
     def ejecutar_tests(self):
         """Ejecuta los tests con pytest"""
-        print("\n🧪 Ejecutando tests con pytest...")
+        print("\nEjecutando tests con pytest...")
         print("-" * 80)
         
         try:
@@ -77,24 +77,24 @@ class MenuPrincipal:
             if resultado == 0:
                 print("\n✅ Todos los tests pasaron correctamente")
             else:
-                print("\n⚠️ Algunos tests fallaron o fueron omitidos")
+                print("\nAlgunos tests fallaron o fueron omitidos")
                 
         except ImportError:
             print("\n❌ pytest no está instalado.")
-            print("\n💡 Instala pytest con:")
+            print("\nInstala pytest con:")
             print("   pip install pytest")
             print("\nO ejecuta los tests manualmente:")
             print("   python -m pytest test_division_parrafos.py -v")
         except Exception as e:
             print(f"\n❌ Error al ejecutar pytest: {e}")
-            print("\n💡 Intenta ejecutar manualmente desde la terminal:")
+            print("\nIntenta ejecutar manualmente desde la terminal:")
             print("   python -m pytest test_division_parrafos.py -v")
         
         self.pausar()
     
     def ejecutar_tests_cobertura(self):
         """Ejecuta tests con reporte de cobertura"""
-        print("\n🧪 Ejecutando tests con cobertura...")
+        print("\nEjecutando tests con cobertura...")
         print("-" * 80)
         
         try:
@@ -116,7 +116,7 @@ class MenuPrincipal:
             
         except ImportError as e:
             if 'pytest_cov' in str(e):
-                print("\n⚠️  pytest-cov no está instalado.")
+                print("\npytest-cov no está instalado.")
                 print("Instala con: pip install pytest-cov")
                 print("\nEjecutando tests normales sin cobertura...")
                 self.ejecutar_tests()
@@ -126,24 +126,24 @@ class MenuPrincipal:
                 print("Instala con: pip install pytest pytest-cov")
         except Exception as e:
             print(f"\n❌ Error: {e}")
-            print("\n💡 Intenta ejecutar manualmente desde la terminal:")
+            print("\nIntenta ejecutar manualmente desde la terminal:")
             print("   python -m pytest test_division_parrafos.py --cov=division_parrafos")
         
         self.pausar()
 
     def ver_documentacion(self):
         """Muestra información del proyecto"""
-        print("\n📚 DOCUMENTACIÓN DEL PROYECTO")
+        print("\nDOCUMENTACIÓN DEL PROYECTO")
         print("=" * 80)
         
         print("""
 Este proyecto implementa 4 algoritmos para el problema de División en Párrafos:
 
 1. ITERATIVO (Programación Dinámica) - O(n²)
-   ✅ Más eficiente, recomendado para producción
+   Más eficiente, recomendado para producción
    
 2. RECURSIVO PURO - O(2ⁿ)
-   ⚠️  Exponencial, solo para demostración (n ≤ 10)
+   Exponencial, solo para demostración (n ≤ 10)
    
 3. DIVIDE Y VENCERÁS - O(n²)
    ✅ Alternativa válida con memoización
@@ -168,18 +168,18 @@ Para más información, consulta README.md
     
     def ejecutar_todo(self):
         """Ejecuta todas las funcionalidades"""
-        print("\n🚀 EJECUCIÓN COMPLETA DEL PROYECTO")
+        print("\nEJECUCIÓN COMPLETA DEL PROYECTO")
         print("=" * 80)
         
-        print("\n1️⃣  CASOS DE PRUEBA")
+        print("\n1CASOS DE PRUEBA")
         print("-" * 80)
         self.ejecutar_casos_prueba()
         
-        print("\n\n2️⃣  ANÁLISIS Y GRÁFICAS")
+        print("\n\nANÁLISIS Y GRÁFICAS")
         print("-" * 80)
         self.ejecutar_analisis()
         
-        print("\n\n3️⃣  TESTS UNITARIOS")
+        print("\n\nTESTS UNITARIOS")
         print("-" * 80)
         self.ejecutar_tests()
         
@@ -191,7 +191,7 @@ Para más información, consulta README.md
     
     def ejemplo_personalizado(self):
         """Permite al usuario ingresar sus propios datos"""
-        print("\n✏️  EJEMPLO PERSONALIZADO")
+        print("\nEJEMPLO PERSONALIZADO")
         print("-" * 80)
     
         try:
@@ -217,8 +217,8 @@ Para más información, consulta README.md
                 # Calcular longitudes
                 palabras = [len(p) for p in palabras_texto]
             
-                print(f"\n📝 Palabras ingresadas: {palabras_texto}")
-                print(f"📏 Longitudes calculadas: {palabras}")
+                print(f"\nPalabras ingresadas: {palabras_texto}")
+                print(f"Longitudes calculadas: {palabras}")
             
                 # Calcular sugerencia realista para L
                 max_longitud = max(palabras)
@@ -248,8 +248,8 @@ Para más información, consulta README.md
                 self.pausar()
                 return
         
-            print(f"\n💡 Ten en cuenta que L es la longitud máxima de la línea en caracteres.")
-            print(f"💡 Sugerencia: Para estas palabras, prueba con L entre {sugerencia_L-5} y {sugerencia_L+5}")
+            print(f"\nTen en cuenta que L es la longitud máxima de la línea en caracteres.")
+            print(f"Sugerencia: Para estas palabras, prueba con L entre {sugerencia_L-5} y {sugerencia_L+5}")
         
             L_input = input(f"Longitud de línea (L) [sugerido {sugerencia_L}]: ")
             L = int(L_input) if L_input.strip() else sugerencia_L
@@ -257,7 +257,7 @@ Para más información, consulta README.md
             b_input = input("Amplitud ideal de espacios (b, típicamente 1.0): ")
             b = float(b_input) if b_input.strip() else 1.0
         
-            print(f"\n🔍 Resolviendo con tus parámetros...")
+            print(f"\nResolviendo con tus parámetros...")
             print(f"L = {L}, b = {b}")
         
             from division_parrafos import DivisionParrafos
@@ -266,7 +266,7 @@ Para más información, consulta README.md
             dp = DivisionParrafos(palabras, L, b)
         
             # DEBUG: Mostrar algunos costos de ejemplo
-            print(f"\n🔍 DEBUG - Costos de ejemplo:")
+            print(f"\nDEBUG - Costos de ejemplo:")
             print("-" * 50)
             n = len(palabras)
         
@@ -309,7 +309,7 @@ Para más información, consulta README.md
             print(f"Tiempo: {tiempo*1000:.4f} ms")
         
             # Mostrar interpretación de cortes
-            print(f"\n🔍 Interpretación de cortes (0-based): {cortes}")
+            print(f"\nInterpretación de cortes (0-based): {cortes}")
             if cortes:
                 print("Esto significa que las líneas terminan en las palabras con índices:")
                 for i, corte in enumerate(cortes):
@@ -361,7 +361,7 @@ Para más información, consulta README.md
         print("=" * 80)
         
         # Detalle por línea
-        print("\n📊 DETALLE POR LÍNEA:")
+        print("\nDETALLE POR LÍNEA:")
         print("-" * 80)
         
         inicio = 0
@@ -414,13 +414,13 @@ Para más información, consulta README.md
             linea_num += 1
         
         print("\n" + "-" * 80)
-        print(f"📊 COSTO TOTAL CALCULADO: {costo_total_calculado:.4f}")
-        print(f"📊 COSTO ÓPTIMO REPORTADO: {dp.resolver_iterativo()[0]:.4f}")
+        print(f"COSTO TOTAL CALCULADO: {costo_total_calculado:.4f}")
+        print(f"COSTO ÓPTIMO REPORTADO: {dp.resolver_iterativo()[0]:.4f}")
         print("-" * 80)
         
         # Verificar consistencia
         if abs(costo_total_calculado - dp.resolver_iterativo()[0]) > 0.001:
-            print("⚠️  ADVERTENCIA: Los costos no coinciden. Puede haber error en la reconstrucción.")
+            print("ADVERTENCIA: Los costos no coinciden. Puede haber error en la reconstrucción.")
         
         # Representación interna
         print("\n🔢 REPRESENTACIÓN INTERNA (solo longitudes):")
@@ -439,7 +439,7 @@ Para más información, consulta README.md
     
     def pausar(self):
         """Pausa la ejecución esperando input del usuario"""
-        input("\n📌 Presiona ENTER para continuar...")
+        input("\nPresiona ENTER para continuar...")
     
     def ejecutar(self):
         """Ejecuta el menú principal"""
@@ -449,7 +449,7 @@ Para más información, consulta README.md
             opcion = input("\nOpción: ").strip()
             
             if opcion == '0':
-                print("\n👋 ¡Hasta luego!")
+                print("\n¡Hasta luego!")
                 sys.exit(0)
             
             if opcion in self.opciones:
@@ -458,7 +458,7 @@ Para más información, consulta README.md
                     try:
                         funcion()
                     except KeyboardInterrupt:
-                        print("\n\n⚠️  Operación cancelada por el usuario")
+                        print("\n\nOperación cancelada por el usuario")
                         self.pausar()
                     except Exception as e:
                         print(f"\n❌ Error: {e}")
@@ -487,7 +487,7 @@ def verificar_dependencias():
             faltantes.append(nombre_pip)
     
     if faltantes:
-        print("\n⚠️  ADVERTENCIA: Faltan dependencias")
+        print("\nADVERTENCIA: Faltan dependencias")
         print("-" * 80)
         print("\nInstala las dependencias faltantes con:")
         print(f"pip install {' '.join(faltantes)}")
@@ -511,7 +511,7 @@ def main():
     try:
         menu.ejecutar()
     except KeyboardInterrupt:
-        print("\n\n👋 Programa interrumpido. ¡Hasta luego!")
+        print("\n\nPrograma interrumpido.")
         sys.exit(0)
 
 
